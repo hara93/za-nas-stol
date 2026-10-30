@@ -127,6 +127,7 @@ test('beef filters include existing mince and keep steak cuts separate in shoppi
     const detail=run(`viewRecipeDetail(RB['${id}'])`);
     assert.ok(detail.includes(r.source.url) && detail.includes(r.buyingTip));
   }
+  for(const id of ['R16','V16']) assert.ok(run(`RB['${id}'].steps.flatMap(stepTimers).some(t=>t.sec===7200)`), 'Slow braise exposes its cooking timer');
   run('state.batch=true');
   assert.ok(run('viewRecipeDetail(RB.R14)').includes('udvostruči i vodu'));
   run("state.rtags.clear();state.rtags.add('ramstek')");

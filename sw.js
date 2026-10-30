@@ -1,5 +1,5 @@
 // Network-first app shell; visited meal photos remain available offline.
-const VERSION = 'zns-6e2f2d61ca82';
+const VERSION = 'zns-23ee6b6bed1e';
 const FONTS = 'zns-fonts';
 const CORE = ['./', './index.html', './experience.css', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 self.addEventListener('install', e => {
