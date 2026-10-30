@@ -1,6 +1,6 @@
 # Fotografije obroka
 
-42 optimizirane WebP slike za 36 recepata i 6 međuobroka. Izrađeno 30. listopada 2026. ugrađenim alatom OpenAI imagegen, bez CLI/API generiranja i bez preuzimanja tuđih fotografija.
+48 optimiziranih WebP slika za 42 recepta i 6 međuobroka. Izrađeno 30. listopada 2026. ugrađenim alatom OpenAI imagegen, bez CLI/API generiranja i bez preuzimanja tuđih fotografija.
 
 Slike su AI-generirani ilustrativni prikazi jela, a ne fotografije stvarno pripremljenih porcija. Ne predstavljaju precizne količine iz recepta.
 
@@ -175,3 +175,31 @@ Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean f
 ### V13 — `assets/meals/V13.webp`
 
 Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Golden turmeric crumbled tofu scramble with wilted spinach and diced red pepper, wholegrain toast and chopped tomatoes on side, cream plate. Use a coherent premium editorial food photography style: warm ivory handmade ceramics, pale warm limestone table, a small natural linen napkin, natural appetizing food texture. Square composition, food centered and filling most of frame, main ingredients clearly recognizable with room for a landscape crop. Soft natural window daylight. No text, logos, watermark, hands, people, packaging or collage.
+
+## Dopuna: junetina
+
+Šest dodatnih slika R14–R16 i V14–V16 zasebno je generirano ugrađenim alatom OpenAI imagegen, u istom vizualnom stilu. Komprimirane su iz izvornih PNG datoteka u WebP širine 768 px, kvalitete 74 (70 ako je potrebno), svaka do 150 kB. Postojeće slike nisu mijenjane.
+
+### R14 — `assets/meals/R14.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Browned sliced striploin steak (ramstek), cooked through with a succulent tan center, with rosemary roasted potato wedges and a fresh tomato and red onion salad on the side. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.
+
+### R15 — `assets/meals/R15.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Browned beef tenderloin medallions (biftek), cooked with no red raw center, with sautéed sliced mushrooms in a light creamy sauce and smooth mashed potatoes. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.
+
+### R16 — `assets/meals/R16.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Slow braised tender beef shoulder chunks with carrots and celery in rich brown tomato gravy, served over creamy golden yellow polenta. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.
+
+### V14 — `assets/meals/V14.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Thin slices of cooked browned striploin steak (tagliata / ramstek) on fresh arugula, shaved parmesan and cherry tomatoes, with wholegrain bread alongside. Tan cooked meat center, no raw red center. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.
+
+### V15 — `assets/meals/V15.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Thin seared cooked beef tenderloin strips and broccoli in a subtle glossy garlic ginger soy glaze, with fluffy brown rice alongside. Beef fully browned, no raw meat. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.
+
+### V16 — `assets/meals/V16.webp`
+
+Use case: photorealistic-natural. Asset type: recipe photo for a Mediterranean family meal app. Subject: Hearty paprika beef shoulder goulash with red peppers, onions and carrots in rich reddish brown sauce, served alongside fluffy cooked buckwheat groats. Coherent premium editorial food photography: warm ivory handmade ceramic plate or bowl, pale warm limestone table, a small natural linen napkin, appetizing realistic food texture. Square composition, food centered and filling most of the frame, main ingredients clearly recognizable, room for landscape crop. Soft natural window daylight. Cooked browned meat, never bloody or raw. No ingredients beyond those specified except basic herbs and olive oil. No text, logos, watermark, hands, people, packaging, collage or alcohol props.

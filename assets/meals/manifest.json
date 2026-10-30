@@ -22,6 +22,9 @@
   "R11": "assets/meals/R11.webp",
   "R12": "assets/meals/R12.webp",
   "R13": "assets/meals/R13.webp",
+  "R14": "assets/meals/R14.webp",
+  "R15": "assets/meals/R15.webp",
+  "R16": "assets/meals/R16.webp",
   "S01": "assets/meals/S01.webp",
   "S02": "assets/meals/S02.webp",
   "S03": "assets/meals/S03.webp",
@@ -40,5 +43,8 @@
   "V10": "assets/meals/V10.webp",
   "V11": "assets/meals/V11.webp",
   "V12": "assets/meals/V12.webp",
-  "V13": "assets/meals/V13.webp"
+  "V13": "assets/meals/V13.webp",
+  "V14": "assets/meals/V14.webp",
+  "V15": "assets/meals/V15.webp",
+  "V16": "assets/meals/V16.webp"
 }

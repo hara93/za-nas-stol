@@ -21,7 +21,7 @@ function app() {
 test('all recipes resolve ingredients, portions and photo assets', () => {
   const run = app();
   const recipes = run('RECIPES');
-  assert.equal(recipes.length, 36);
+  assert.equal(recipes.length, 42);
   assert.equal(new Set(recipes.map(r=>r.id)).size, recipes.length);
   for (const r of recipes) {
     for (const e of r.batch) {
@@ -38,7 +38,9 @@ test('all recipes resolve ingredients, portions and photo assets', () => {
       assert.ok(n.kcal>0 && n.p>0 && Object.values(n).every(Number.isFinite));
     }
   }
-  for (const [id,file] of Object.entries(run('IMAGES'))) assert.ok(fs.existsSync(path.join(base,file)), `Missing photo ${id}`);
+  const photos=run('IMAGES');
+  for(const {id} of [...recipes,...run('SNACKS')]) assert.ok(photos[id], `Missing photo mapping ${id}`);
+  for (const [id,file] of Object.entries(photos)) assert.ok(fs.existsSync(path.join(base,file)), `Missing photo ${id}`);
 });
 test('new recipes expose source, tags and dry-weight nutrition', () => {
   const run=app();
@@ -63,7 +65,7 @@ test('search supports Croatian without accents, all meals and ingredient filters
   assert.equal(run('RECIPES.filter(recipeMatches).length'),2);
   assert.ok(run('viewRecipes()').includes('Zlatni tofu'));
   run("state.rq='nothing';state.rmeal='rucak';state.favoritesOnly=true;ACTIONS['clear-filters']()");
-  assert.equal(run('RECIPES.filter(recipeMatches).length'),36);
+  assert.equal(run('RECIPES.filter(recipeMatches).length'),42);
   assert.equal(run('state.rmeal'),'all');
 });
 test('favorites persist in existing settings and survive export/import', () => {
@@ -110,4 +112,33 @@ test('default photos never override a user photo and request failure has an illu
   assert.equal(run("imgSrc('D04')"),'/_blob/custom-photo');
   assert.match(run("pic('D04')"),/data-recipe-image="D04"/);
   assert.match(run("pic('R11')"),/assets\/meals\/R11.webp/);
+});
+
+test('beef filters include existing mince and keep steak cuts separate in shopping', () => {
+  const run=app();
+  run("state.rtags.add('junetina')");
+  assert.ok(run("recipeMatches(RECIPES.find(r=>r.batch.some(e=>e[1]==='junetina_mljevena')))"));
+  assert.ok(!run("recipeMatches(RB.R11)"));
+  for(const id of ['R14','R15','R16','V14','V15','V16']) {
+    assert.ok(run(`recipeMatches(RB['${id}'])`));
+    const r=run(`RB['${id}']`);
+    assert.equal(r.protein,'crveno');
+    assert.ok(r.source.url.startsWith('https://') && r.nutritionNote);
+    const detail=run(`viewRecipeDetail(RB['${id}'])`);
+    assert.ok(detail.includes(r.source.url) && detail.includes(r.buyingTip));
+  }
+  run('state.batch=true');
+  assert.ok(run('viewRecipeDetail(RB.R14)').includes('udvostruči i vodu'));
+  run("state.rtags.clear();state.rtags.add('ramstek')");
+  assert.equal(run('RECIPES.filter(recipeMatches).length'),2);
+  run("state.rtags.clear();state.rtags.add('biftek')");
+  assert.equal(run('RECIPES.filter(recipeMatches).length'),2);
+  run("state.weekStart='2026-11-09';state.docs['plans/'+state.weekStart]=emptyPlan(state.weekStart);setSlot(state.weekStart,0,'l','R14');setSlot(state.weekStart,1,'l','R15');setSlot(state.weekStart,2,'l','R16')");
+  for(const [id,cut] of [['R14','ramstek'],['R15','biftek'],['R16','juneca_plecka']]) {
+    assert.equal(run(`weekShopping(state.weekStart)['${cut}']`),run(`wholeOf(RB['${id}'])['${cut}']`));
+    assert.ok(run(`ING['${cut}'].src`).includes('USDA'));
+  }
+  run("setSlot(state.weekStart,1,'l','R14')");
+  assert.equal(run('weekShopping(state.weekStart).biftek'),undefined);
+  assert.equal(run('weekShopping(state.weekStart).ramstek'),run('wholeOf(RB.R14).ramstek*2'));
 });

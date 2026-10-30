@@ -22,6 +22,7 @@ node --test tests/*.test.cjs
 - `experience.css`: vizualni izgled i prilagodbe mobitelu/računalu.
 - `assets/meals/`: optimizirane AI slike, manifest i opis generiranja.
 - `data/recipe-sources.json`: izvori šest recepata s kvinojom, heljdom i tofuom te USDA podataka.
+- `data/beef-recipe-sources.json`: izvori šest jela s ramstekom, biftekom i junećom plećkom, profili komada mesa i upute za pečenje.
 - `sw.js`: offline aplikacija i predmemorija pregledanih slika.
 
 Postojeći ključevi `zns:` u localStorage ostaju isti. Favoriti su dio `settings/main` i uključeni su u postojeći izvoz/uvoz. Izbor teme čuva se na uređaju. Nova verzija ne mijenja spremljeni plan, dnevnik, imena ili omjere porcija.

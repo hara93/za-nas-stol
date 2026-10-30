@@ -1,0 +1,169 @@
+{
+  "verifiedOn": "2026-10-30",
+  "provenance": "Primary publisher/author recipe pages and the official RecipeTin Eats cookbook were read. Recipes are independently worded Croatian family adaptations. They have not been independently cooked/tested by us; publisher ratings or testing claims do not apply to these adaptations.",
+  "recipeSources": [
+    {
+      "id": "R14",
+      "title": "Good Food · Steak & roast vegetables with sundried tomato dressing",
+      "url": "https://www.bbcgoodfood.com/recipes/steak-roast-vegetables-sundried-tomato-dressing",
+      "note": "Obiteljska prilagodba s običnim krumpirom i svježom salatom. Kratko pečenje izvornika zamijenjeno je USDA provjerom temperature i odmorom; prilagodba nije zasebno testirana u kuhinji."
+    },
+    {
+      "id": "R15",
+      "title": "Good Food · Mushroom sauce",
+      "url": "https://www.bbcgoodfood.com/recipes/mushroom-sauce",
+      "note": "Umak je prilagođen objavljenom receptu: obične gljive, jogurt i maslinovo ulje, bez vina. Biftek i pire čine našu obiteljsku kombinaciju, koja nije zasebno kuhinjski testirana.",
+      "scope": "Published sauce provides inspiration; biftek plus mash is our meal assembly, not the source recipe."
+    },
+    {
+      "id": "R16",
+      "title": "Good Food · One-pan beef stew with vegetable mash",
+      "url": "https://www.bbcgoodfood.com/recipes/one-pan-beef-stew-with-vegetable-mash",
+      "note": "Prilagodba bez alkohola: plećka, mrkva i celer, uz palentu umjesto pirea. Vrijeme ovisi o mesu; ova kombinacija nije zasebno kuhinjski testirana."
+    },
+    {
+      "id": "V14",
+      "title": "Jamie Oliver · Italian seared beef",
+      "url": "https://www.jamieoliver.com/recipes/beef/italian-seared-beef/",
+      "note": "Inspirirano slaganjem mesa, rukole i parmezana; bez pesta i pinjola, uz rajčicu i kruh. Koristi naš ramstek i USDA temperaturu, ne kratko pečenje izvornika. Nije zasebno kuhinjski testirano."
+    },
+    {
+      "id": "V15",
+      "title": "RecipeTin Eats · Beef and Broccoli, Asian Takeout eCookbook, str. 74",
+      "url": "https://www.recipetineats.com/uploads/2020/06/Asian-Takeout-eCookbook-RecipeTin-Eats.pdf#page=74",
+      "note": "Prilagodba bez vina, s integralnom rižom i jednostavnim umakom. Biftek se peče cijeli pa reže radi pouzdane provjere temperature. Prilagodba nije zasebno kuhinjski testirana.",
+      "scope": "Official author cookbook, Beef and Broccoli, printed page 74. Source sauce adapted without cooking wine and with plain flour instead of cornflour. Whole steaks are cooked and rested before slicing for reliable temperature measurement."
+    },
+    {
+      "id": "V16",
+      "title": "Good Food · Beef goulash (sweetunique)",
+      "url": "https://www.bbcgoodfood.com/recipes/beef-goulash",
+      "note": "Prilagodba objavljenog članskog recepta bez vina, s heljdom i jogurtom umjesto kiselog vrhnja. Prilagodba nije zasebno testirana u kuhinji; vrijeme pirjanja ovisi o komadu.",
+      "publisherStatus": "Published Good Food member recipe by sweetunique; do not label as an editorial tested recipe."
+    }
+  ],
+  "nutrition": {
+    "source": "USDA National Nutrient Database for Standard Reference, Release 28 (2015), as hosted by USDA ARS",
+    "landingPage": "https://www.ars.usda.gov/northeast-area/beltsville-md-bhnrc/beltsville-human-nutrition-research-center/methods-and-application-of-food-composition-laboratory/mafcl-site-pages/sr11-sr28/",
+    "download": "https://www.ars.usda.gov/ARSUserFiles/80400535/DATA/SR/sr28/dnload/sr28asc.zip",
+    "method": "Read FOOD_DES.txt and NUT_DATA.txt from the official USDA SR28 ASCII ZIP. All meat quantities and profiles are raw, boneless edible portions with exterior fat trimmed to 0 inches. Lean and fat records retain intramuscular fat. Rice quantities and profile are dry/raw. Values per 100 g; all required fields in these four profiles are present in USDA source.",
+    "records": [
+      {
+        "id": "ramstek",
+        "ndbNumber": "23339",
+        "description": "Beef, loin, top loin steak, boneless, lip off, separable lean and fat, trimmed to 0 inch fat, all grades, raw",
+        "basis": "per 100 g raw edible portion; dry weight for rice",
+        "note": "Orijentacijski USDA profil top loin / strip steak, očišćen od vanjske masnoće. Hrvatski naziv ramstek nije automatski jednak britanskom rump; rez i prošaranost potvrdi kod mesara.",
+        "missingNutrients": []
+      },
+      {
+        "id": "biftek",
+        "ndbNumber": "23342",
+        "description": "Beef, loin, tenderloin steak, boneless, separable lean and fat, trimmed to 0 inch fat, all grades, raw",
+        "basis": "per 100 g raw edible portion; dry weight for rice",
+        "note": "USDA tenderloin / filet mignon, bez kosti i vanjske masnoće. Važe se sirov i očišćen od srebrnaste opne; sastav je orijentacijski.",
+        "missingNutrients": []
+      },
+      {
+        "id": "juneca_plecka",
+        "ndbNumber": "23000",
+        "description": "Beef, shoulder pot roast or steak, boneless, separable lean and fat, trimmed to 0 inch fat, all grades, raw",
+        "basis": "per 100 g raw edible portion; dry weight for rice",
+        "note": "Orijentacijski USDA shoulder / chuck clod za pirjanje, vanjska masnoća odrezana. Važe se sirovo očišćeno meso; prošaranost mijenja vrijednosti.",
+        "missingNutrients": []
+      },
+      {
+        "id": "riza_integralna",
+        "ndbNumber": "20036",
+        "description": "Rice, brown, long-grain, raw",
+        "basis": "per 100 g raw edible portion; dry weight for rice",
+        "note": "Količina je za suhu rižu; vrijeme kuhanja provjeri na pakiranju.",
+        "missingNutrients": []
+      }
+    ],
+    "nutrientCodes": {
+      "kcal": "208",
+      "p": "203",
+      "f": "204",
+      "c": "205",
+      "fib": "291",
+      "sug": "269",
+      "sat": "606",
+      "epa": "629",
+      "dha": "621",
+      "fe": "303",
+      "ca": "301",
+      "mg": "304",
+      "k": "306",
+      "zn": "309",
+      "vd": "328",
+      "b12": "418",
+      "fol": "417",
+      "vc": "401",
+      "na": "307"
+    },
+    "units": {
+      "kcal": "kcal",
+      "p,f,c,fib,sug,sat,epa,dha": "g",
+      "fe,ca,mg,k,zn,vc,na": "mg",
+      "vd,b12,fol": "µg"
+    },
+    "caveats": [
+      "Croatian ramstek is not automatically equivalent to British rump. NDB 23339 is a clearly labeled US top loin / strip steak approximation; the exact local cut should be confirmed with the butcher.",
+      "Beef marbling, trimming and exact cut vary. These are indicative composition profiles, not measured nutrition for the purchased meat.",
+      "All new meats are distinct ingredient IDs, so shopping and nutrition retain the cut distinction.",
+      "Existing heljda ingredient lacks sugar in its USDA record; new recipe V16 inherits that source limitation. The parent application should retain its partial-total indication."
+    ]
+  },
+  "foodSafety": {
+    "wholeBeefCuts": "63 °C measured with a food thermometer in the middle, followed by at least 3 minutes rest before slicing. Applied to R14,R15,V14,V15. This is for whole cuts, not ground beef.",
+    "source": "https://ask.fsis.usda.gov/article/What-is-a-safe-internal-temperature-for-cooking-meat-and-poultry",
+    "secondOfficialSource": "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures",
+    "adaptation": "Source recipes that suggest rare/medium-rare searing times are not followed. V15 cooks the biftek as whole steaks, rests it, then cuts against the grain and briefly warms the strips in the sauce. Braises simmer until fork-tender; time depends on the meat."
+  },
+  "validation": [
+    "Six unique IDs R14-R16,V14-V16; no collision with the existing 36 recipes at generation.",
+    "Four new ingredient IDs ramstek,biftek,juneca_plecka,riza_integralna; all nutrient fields populated directly from SR28, no zero imputation.",
+    "All batch ingredient references resolve against current DATA plus additions. Group indexes valid, weights positive, fourth batch multiplier 1.",
+    "All ingredient weights are whole-family raw/dry edible amounts using existing 55:33:12 split. No per-person extras or exclusions.",
+    "All six use protein crveno so existing red-meat planning rules continue to apply.",
+    "Every material ingredient in preparation is listed in batch or spices; water is added in steps. R15 sauce uses listed yogurt, mustard, mushrooms, onion, garlic and oil; mash uses listed milk. V15 ginger is in spices. R16 celery is in batch.",
+    "All six have primary source titles, URLs, explicit adaptation notes and ingredient-matched image descriptions.",
+    "Nutrition notes identify raw meat and dry grain weights. buyingTip gives cut-selection/cooking advice and should be rendered in recipe UI.",
+    "R16 and V16 total time is 180 minutes (slow braises); remaining total times 25-45 minutes.",
+    "No alcohol in ingredient lists or instructions. Source prose independently rewritten; no publisher recipe prose quoted.",
+    "Step instructions reference ingredient-group oil allocations instead of fixed gram amounts, preserving ×2 scaling. Fixed water amounts explicitly refer to the base family recipe; parent UI reminds users to scale step water and spices at ×2."
+  ],
+  "familyTotalsApproximate": {
+    "R14": {
+      "kcal": 1609.6,
+      "protein_g": 119.0
+    },
+    "R15": {
+      "kcal": 1666.0,
+      "protein_g": 141.2
+    },
+    "R16": {
+      "kcal": 1937.9,
+      "protein_g": 148.5
+    },
+    "V14": {
+      "kcal": 1751.1,
+      "protein_g": 149.2
+    },
+    "V15": {
+      "kcal": 1675.9,
+      "protein_g": 126.4
+    },
+    "V16": {
+      "kcal": 1820.6,
+      "protein_g": 151.9
+    }
+  },
+  "integrationNotes": [
+    "No application/repository files were changed by the recipe researcher. Merge ingredients and recipes into DATA, bringing total recipes to 42.",
+    "Render buyingTip along with source and nutritionNote. Retain source member-recipe attribution for V16.",
+    "Family macro totals above are unrounded ingredient sums for QA, not exact finished-dish analysis.",
+    "At ×2, show the planned reminder to double base water and spices in the instructions. Ingredient-group oil allocations automatically follow scaled batch quantities."
+  ]
+}
