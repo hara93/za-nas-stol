@@ -1,0 +1,113 @@
+{
+  "verifiedOn": "2026-10-30",
+  "classification": "Practical conservative defaults for buying cadence, not a promise that every item lasts one month. Pantry assumes unopened shelf-stable products; freezer assumes suitable food is promptly frozen; fresh means weekly replenishment. Product label and use-by date take precedence.",
+  "packageAssumptions": "All packSize values are editable illustrative defaults, not retailer availability claims. packSize uses existing app base quantities (grams or ml; eggs are grams with piece=50). Zero means no assumed fixed package: buy on weight or configure the actual package. No price or brand purchasing recommendation is made.",
+  "sources": [
+    {
+      "title": "FoodSafety.gov · Cold Food Storage Chart",
+      "url": "https://www.foodsafety.gov/food-safety-charts/cold-food-storage-charts",
+      "supports": [
+        "Refrigerator at 4°C or below and freezer at -18°C or below.",
+        "Raw poultry and mince keep only a short time refrigerated; use freezing for later-week stock. Whole raw steaks/roasts and raw fish are suitable for freezer storage.",
+        "Do not freeze eggs in their shells."
+      ]
+    },
+    {
+      "title": "Food Standards Agency · How to chill, freeze and defrost food safely",
+      "url": "https://www.gov.uk/government/publications/how-to-chill-freeze-and-defrost-food-safely/how-to-chill-freeze-and-defrost-food-safely",
+      "supports": [
+        "Follow label storage and freezing instructions; freeze before use-by, seal food and label it.",
+        "Freezing individual portions lets the household defrost only the amount required; defrost in the refrigerator.",
+        "Dairy, prepared salads and foods with use-by dates require refrigeration; opened products may need different storage."
+      ]
+    },
+    {
+      "title": "Food Standards Agency · Home food fact checker",
+      "url": "https://www.gov.uk/government/publications/home-food-fact-checker/home-food-fact-checker",
+      "supports": [
+        "Milk processing and manufacturer instructions determine storage and date marking, so unspecified milk is not assumed to be shelf-stable UHT.",
+        "After opening canned food, transfer unused contents into a suitable container and refrigerate; follow the open-life instructions.",
+        "Potatoes require suitable cool/dark/dry conditions; the app conservatively leaves raw produce in weekly fresh shopping."
+      ]
+    }
+  ],
+  "uiNotes": [
+    "Za kasnije tjedne meso i ribu podijeli u porcije, dobro zatvori, označi datum i zamrzni prije isteka roka uporabe. Odmrzavaj u hladnjaku.",
+    "Ostava vrijedi za neotvorene trajne proizvode. Nakon otvaranja slijedi deklaraciju; svježe namirnice kupuj tjedno ili češće prema roku.",
+    "Hladnjak drži na 4 °C ili niže, a zamrzivač na −18 °C ili niže. Provjeri koliko prostora imaš prije mjesečne kupovine."
+  ],
+  "calculation": {
+    "need": "Sum actual ingredient needs across every planned meal in the selected interval before package rounding.",
+    "stock": "Usable amount already available at the START of the selected interval; same base unit. Subtract it once, not once per week.",
+    "deficit": "max(0, need - stock)",
+    "packages": "packSize > 0 ? ceil(deficit / packSize) : null",
+    "buy": "packSize > 0 ? packages * packSize : deficit",
+    "leftover": "max(0, stock + buy - need)",
+    "monthly": "For pantry/freezer, sum all 4 actual weeks then round once; do not multiply the first week. Exception: weeklyPacks defaults for canned foods, passata, olives and capers round each week separately because opened leftovers may not last into later weeks. This is editable. For fresh, show each week separately and do not assume perishable leftovers survive until the next week.",
+    "checkmarks": "A bought checkmark is UI completion only. Do not automatically increase stock unless a separate explicit stock-receipt operation handles quantities and prevents double subtraction/reordering.",
+    "stockPeriod": "Label stock as available at interval start. For future months, do not reuse the same current pantry quantity as though no earlier planned consumption happened."
+  },
+  "examples": [
+    {
+      "need": 350,
+      "stock": 0,
+      "packSize": 1000,
+      "packages": 1,
+      "buy": 1000,
+      "leftover": 650
+    },
+    {
+      "need": 1400,
+      "stock": 0,
+      "packSize": 1000,
+      "packages": 2,
+      "buy": 2000,
+      "leftover": 600
+    },
+    {
+      "need": 1400,
+      "stock": 650,
+      "packSize": 1000,
+      "packages": 1,
+      "buy": 1000,
+      "leftover": 250
+    },
+    {
+      "need": 350,
+      "stock": 400,
+      "packSize": 1000,
+      "packages": 0,
+      "buy": 0,
+      "leftover": 50
+    },
+    {
+      "ingredient": "jaja",
+      "need": 750,
+      "stock": 0,
+      "packSize": 500,
+      "piecesPerPack": 10,
+      "packages": 2,
+      "buy": 1000,
+      "leftover": 250,
+      "display": "15 jaja potrebno → 2 pakiranja po 10 → 5 jaja ostaje"
+    },
+    {
+      "ingredient": "slanutak",
+      "need": 320,
+      "stock": 0,
+      "packSize": 240,
+      "packages": 2,
+      "buy": 480,
+      "leftover": 160,
+      "display": "320 g ocijeđeno potrebno → 2 konzerve po 240 g ocijeđeno → 160 g ostaje"
+    }
+  ],
+  "unitEdgeCases": [
+    "Egg requirement and stock use edible grams internally; convert UI pieces through ING.jaja.piece=50 before arithmetic.",
+    "Canned legumes, sardines, olives, capers and mozzarella must use drained/edible product mass where relevant, never gross can weight.",
+    "Oil and soy sauce are gram-based in current recipes. A 500 ml bottle must not silently be treated as 500 g. Defaults are zero until actual mass-equivalent package is configured; optionally add explicit, verified conversion support.",
+    "Lemon ingredient is ml of juice, not mass of whole lemons. Default zero avoids inventing a yield. UI can support a user-entered ml yield per lemon or bottled juice size.",
+    "Loose produce and meat are edible/cleaned weights; allow margin for trim/peel as a user choice, not hidden nutrient changes.",
+    "Fresh and freezer are suggested procurement/storage choices, not automatic changes to recipe ingredients or nutritional basis."
+  ]
+}

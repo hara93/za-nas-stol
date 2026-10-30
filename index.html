@@ -662,6 +662,8 @@ const WEB_BUILD = true;
 const SEED_DOCS = {"plans/2026-10-26":{"week":"2026-10-26","days":[{"b":"D02","l":"R02","v":"V08","montaza":false},{"b":"D10","l":"R01","v":"V09","montaza":false},{"b":"D09","l":"R10","v":"V04","montaza":false},{"b":"D08","l":"R09","v":"V01","montaza":false},{"b":"D04","l":"R07","v":"V07","montaza":false},{"b":"D03","l":"R04","v":"V02","montaza":false},{"b":"D07","l":"R06","v":"V10","montaza":false}]},"plans/2026-11-02":{"week":"2026-11-02","days":[{"b":"D06","l":"R05","v":"V05","montaza":false},{"b":"D09","l":"R01","v":"V04","montaza":false},{"b":"D01","l":"R08","v":"V06","montaza":false},{"b":"D07","l":"R07","v":"V09","montaza":false},{"b":"D10","l":"R10","v":"V07","montaza":false},{"b":"D04","l":"R09","v":"V08","montaza":false},{"b":"D08","l":"R06","v":"V01","montaza":false}]}};
 
 </script>
+<script src="shopping-data.js"></script>
+<script src="shopping.js"></script>
 <script>
 'use strict';
 /* ===================== Ilustracije jela =====================
@@ -1112,7 +1114,7 @@ const PEOPLE = ['T', 'S', 'K'], ADULTS = ['T', 'S'];
 const TABS = ['danas', 'plan', 'recepti', 'kupovina', 'napredak'];
 /* Samostalna web-aplikacija (scripts/build_web.py): bez Claudea, podaci na uređaju, instalira se na početni zaslon. */
 const WEB = typeof WEB_BUILD !== 'undefined' && WEB_BUILD === true;
-const DOC_PATH = /^(settings\/main|custom\/recipes|plans\/\d{4}-\d{2}-\d{2}|shopping\/\d{4}-\d{2}-\d{2}|images\/all)$/;
+const DOC_PATH = /^(settings\/main|custom\/recipes|plans\/\d{4}-\d{2}-\d{2}|shopping\/\d{4}-\d{2}-\d{2}|shopping-month\/\d{4}-\d{2}-\d{2}|planner\/latest|images\/all)$/;
 const LOG_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const VIEWS = TABS.concat('postavke');
 
@@ -1180,10 +1182,10 @@ const LS = {
 
 /* ===================== Stanje i pohrana ===================== */
 const state = {
-  view: 'danas', microP: 'T', date: today(), weekStart: isoDate(mondayOf(new Date())),
+  view: 'danas', microP: 'T', date: today(), weekStart: LOG_DATE.test(LS.get('zns:planWeek') || '') ? LS.get('zns:planWeek') : isoDate(mondayOf(new Date())),
   recipe: null, rmeal: 'all', rtags: new Set(), rq: '', favoritesOnly: false, docs: {}, logs: {},
   db: null, user: null, assets: null, mode: 'local', dbReady: false, writable: null,
-  batch: false, modal: null, onlyEaten: false, rsearch: '', hideBought: false,
+  batch: false, modal: null, onlyEaten: false, rsearch: '', hideBought: false, shopMode: LS.get('zns:shopMode') === 'month' ? 'month' : 'week',
   got: new Set(), cook: null, from: 'recepti', sec: 'sec-porcije', fresh: false, listScroll: 0, vt: false
 };
 const subs = {}; const chains = {};
@@ -1234,6 +1236,7 @@ function saveDoc(path, data) { state.docs[path] = data; render(); persist(path, 
 function saveLog(doc) { state.logs[doc.date] = doc; render(); persist('logs/' + doc.date, doc); }
 function deleteLog(date) { delete state.logs[date]; render(); persist('logs/' + date, null); }
 function ensureWatches() {
+  ensureShoppingWatches();
   watch('settings/main'); watch('custom/recipes'); watch('images/all'); watch('plans/' + state.weekStart); watch('shopping/' + state.weekStart);
   const wsDate = isoDate(mondayOf(parseDate(state.date))); watch('plans/' + wsDate); watch('shopping/' + wsDate); watchLogs();
 }
@@ -1314,7 +1317,7 @@ function fmtGrams(iid, g) { const ing = ING[iid]; if (ing.unit === 'kom') { cons
 function fmtQty(iid, g) { const ing = ING[iid]; if (ing.unit === 'kom') return Math.ceil(g / ing.piece - 0.001) + ' kom'; if (g >= 1000) return fmt(g / 1000, 1) + (ing.unit === 'ml' ? ' l' : ' kg'); return Math.round(g) + (ing.unit === 'ml' ? ' ml' : ' g'); }
 function weekShopping(ws) { const tot = {}; getPlan(ws).days.forEach(d => SLOTS.forEach(([k]) => { const r = RB[d[k]]; if (!r) return; for (const [iid, g] of Object.entries(wholeOf(r))) tot[iid] = (tot[iid] || 0) + g; })); return tot; }
 function weekFilled(ws) { return getPlan(ws).days.reduce((n, d) => n + SLOTS.filter(([k]) => d[k] && RB[d[k]]).length, 0); }
-function shopProgress(ws) { const tot = weekShopping(ws); const checked = (state.docs['shopping/' + ws] || {}).checked || {}; const ids = Object.keys(tot); return { n: ids.length, done: ids.filter(k => checked[k]).length }; }
+function shopProgress(ws) { const rows = shoppingRows(ws, 'week').filter(r => r.buy > 0); return { n: rows.length, done: rows.filter(shoppingMarkMatches).length }; }
 /* Trajanja u koracima ("5–7 minuta", "30 sekundi") postaju mjerači vremena; raspon kreće od donje granice – tada provjeri. */
 function stepTimers(text) {
   const out = []; const re = /(\d+)(?:\s*[–-]\s*(\d+))?\s*(sekund[a-zčćšž]*|minut[a-zčćšž]*|sat[a-zčćšž]*)/gi; let m;
@@ -1512,6 +1515,7 @@ function morphChildren(from, to) {
 function patch(el, html) { const t = document.createElement(el.tagName); t.innerHTML = html; morphChildren(el, t); }
 let lastCtx = '', booted = false;
 function render() {
+  if (LS.get('zns:planWeek') !== state.weekStart) LS.set('zns:planWeek', state.weekStart);
   ensureWatches(); NUTC.clear();
   root().dataset.view = state.view;
   document.querySelectorAll('.theme-toggle').forEach(b => { const dark = document.documentElement.dataset.theme === 'dark'; b.setAttribute('aria-label', dark ? 'Uključi svijetli izgled' : 'Uključi tamni izgled'); b.setAttribute('aria-pressed', String(dark)); });
@@ -1645,7 +1649,7 @@ function viewToday() {
       <label>Struk (cm)<input type="number" step="0.5" min="40" max="200" inputmode="decimal" id="q-waist-${p}" name="waist-${p}" value="${lp.waist ?? ''}" placeholder="npr. 84"></label>
       <button type="button" class="toggle" data-action="toggle-training" data-p="${p}" aria-pressed="${!!lp.training}" id="q-training-${p}"><i>${ic('check', '')}</i>Trening</button></div>`;
   }).join('')}<div class="full row between"><span class="small muted">Vaganje ujutro, nakon WC-a, prije jela.</span><button class="btn primary" type="submit">Spremi</button></div></form>`;
-  return `${hello}${week}${filled === 0 ? `<section class="card start-week"><div><h3>Što ćemo kuhati ovaj tjedan?</h3><p class="small muted">Složi svih 21 obrok, pa prilagodi po želji.</p></div><button class="btn primary" data-action="suggest-week-here">${ic('spark')}Složi tjedan</button></section>` : ''}
+  return `${hello}${week}${curatedBanner()}${filled === 0 ? `<section class="card start-week"><div><h3>Što ćemo kuhati ovaj tjedan?</h3><p class="small muted">Složi svih 21 obrok, pa prilagodi po želji.</p></div><button class="btn primary" data-action="suggest-week-here">${ic('spark')}Složi tjedan</button></section>` : ''}
   <section class="stack meals-section" id="meals"><div class="sect-h"><div><span class="eyebrow">Vaš dnevni jelovnik</span><h2>${isToday ? 'Što danas kuhamo?' : 'Planirani obroci'}</h2></div><span class="meal-progress">${ic('check')} ${planned ? eatenN + ' / ' + planned + ' pojedeno' : 'Još nema plana'}</span></div><div class="timeline">${meals}</div></section>
   <div class="today-secondary"><div class="col">${flow}${snacksCard}<details class="card disclosure" id="today-log"><summary><span>${ic('list')} Dnevnik</span><span class="small muted">Težina i trening ${ic('down')}</span></summary><div class="disclosure-body">${quick}</div></details></div><div class="col">${summary}<div class="quiet-note">${ic('pot')}<p>Jedno kuhanje, tri tanjura.<br><span class="muted">Porcije su već prilagođene vašoj obitelji.</span></p></div></div></div>`;
 }
@@ -1751,37 +1755,20 @@ function viewPlan() {
   const freezeHints = [...new Set(plan.days.flatMap(d => SLOTS.map(([k]) => d[k]).filter(id => id && RB[id] && RB[id].freeze && RB[id].meal === 'vecera')))].map(id => RB[id].title.split(' s ')[0]);
   const stat = (lab, val, ok) => `<span class="stat ${ok === true ? 'ok' : (ok === false ? 'warn' : '')}">${lab} <b>${val}</b></span>`;
   return `<section class="pagehead"><span class="eyebrow">Manje razmišljanja, više uživanja</span><h1>Tjedan po vašem ukusu.</h1><p class="muted">Složi plan jednim dodirom. Svaki obrok lako zamijeniš.</p></section>
+  ${curatedBanner()}${state.docs['planner/latest'] ? `<button class="text-btn" data-action="restore-curated">${ic('undo')}Vrati plan prije pripremljenog jelovnika</button>` : ''}
   <section class="stack">${weekNav(ws, all.length ? `${all.length}/21 obroka` : '')}
     ${all.length ? `<div class="stats">${stat('Riba', fish + '×', fish >= s.fishPerWeek)}${stat('Crveno meso', red + '×', red <= 3 ? null : false)}${stat('Perad', poultry + '×', poultry <= 5 ? null : false)}${ADULTS.map(p => stat('Prosjek · ' + esc(pname(p)), fmt(avgK(p)) + ' kcal', null)).join('')}</div>` : ''}
     <div class="actions"><button class="btn primary" data-action="suggest-week">${ic('spark')}${all.length ? 'Novi prijedlog' : 'Predloži tjedan'}</button>${all.length && all.length < 21 ? `<button class="btn soft" data-action="suggest-week-fill">${ic('plus')}Popuni prazno</button>` : ``}${all.length ? `<button class="btn outline danger" data-action="clear-week">${ic('trash')}Očisti</button>` : ''}</div></section>
   <section class="days ${state.fresh ? 'fresh' : ''}">${days}</section>
   <section class="card"><details class="more" id="plan-rules" style="border:0;padding:0"><summary>Kako slažem prijedlog ${ic('down', '')}</summary><div class="rules">
-    <div><b>Pravila:</b> riba ${fmt(s.fishPerWeek)}× tjedno (jedan riblji obrok je losos ili srdele zbog omega-3), crveno meso najviše 2–3×, perad najviše 4–5×, bez ponavljanja jela u tjednu i u odnosu na prethodna tri tjedna, isti izvor proteina ne ide dvaput u danu, izmjena slatkih i slanih doručaka. Na dan montaže ručak je hladni.</div>
+    <div><b>Pravila:</b> riba ${fmt(s.fishPerWeek)}× tjedno (jedan riblji obrok je losos ili srdele zbog omega-3), crveno meso najviše 2–3×, perad najviše 4–5×, bez ponavljanja jela unutar tjedna, uz izmjenu recepata između tjedana, isti izvor proteina ne ide dvaput u danu, izmjena slatkih i slanih doručaka. Na dan montaže ručak je hladni.</div>
     <div><b>Porcije:</b> svako jelo kuha se jednom za sve i dijeli u omjeru ${pct('T')} : ${pct('S')} : ${pct('K')} (${esc(pname('T'))} : ${esc(pname('S'))} : ${esc(pname('K'))}).</div>
     ${freezeHints.length ? `<div><b>Zamrzivač:</b> ${esc(freezeHints.join(', '))} možeš skuhati u duploj količini (gumb ×2 u receptu) i pola zamrznuti za sljedeći tjedan.</div>` : ''}
     <div>Dodirni bilo koji obrok da ga zamijeniš; „Popuni prazno” zadržava ono što si već odabrao.</div></div></details></section>`;
 }
 
 /* ---------- Kupovina ---------- */
-function viewShopping() {
-  const ws = state.weekStart, tot = weekShopping(ws); const checked = (state.docs['shopping/' + ws] || {}).checked || {};
-  const byCat = {}; Object.entries(tot).forEach(([iid, g]) => { const c = ING[iid].cat; (byCat[c] = byCat[c] || []).push([iid, g]); });
-  const order = ['meso', 'mlijecno', 'povrce', 'voce', 'zitarice', 'orasasti', 'ostalo', 'suplementi'];
-  const n = Object.keys(tot).length, done = Object.keys(tot).filter(k => checked[k]).length; const pct = n ? Math.round(100 * done / n) : 0;
-  const list = order.filter(c => byCat[c]).map(c => {
-    const items = byCat[c].sort((a, b) => ING[a[0]].name.localeCompare(ING[b[0]].name, 'hr')); const cd = items.filter(([k]) => checked[k]).length;
-    const vis = state.hideBought ? items.filter(([k]) => !checked[k]) : items;
-    if (!vis.length) return '';
-    return `<section class="card shop ${cd === items.length ? 'complete' : ''}" data-key="cat-${c}"><div class="ch">${FoodArt.cat(c)}<h3>${CATS[c]}</h3><span>${cd}/${items.length}</span></div><ul>${vis.map(([iid, g]) => `<li class="${checked[iid] ? 'done' : ''}" data-key="${iid}"><button class="srow" data-action="toggle-shop" data-id="${iid}" aria-pressed="${!!checked[iid]}"><span class="check sm ${checked[iid] ? 'on' : ''}">${ic('check', '')}</span><span class="nm">${esc(ING[iid].name)}</span><span class="qty">${fmtQty(iid, g)}</span></button></li>`).join('')}</ul></section>`;
-  }).join('');
-  return `<section class="pagehead"><span class="eyebrow">Iz plana ravno u košaricu</span><h1>Sve za naš stol.</h1><p class="muted">Namirnice su zbrojene i složene po odjelima trgovine.</p></section>
-  <section class="stack">${weekNav(ws)}</section>
-  ${n ? `<section class="card stack"><div class="shopsum"><div class="ringbox" style="position:relative;width:72px;height:72px">${ringSvg(done, n, 72, 8)}</div><div class="stack tight"><div class="big">${done} <span class="muted" style="font-size:1rem;font-weight:600">od ${n} kupljeno</span></div><span class="small muted">${done === n ? 'Sve je kupljeno. Možeš kuhati.' : `Još ${n - done} ${n - done === 1 ? 'stavka' : 'stavki'} za sve troje, cijeli tjedan.`}</span></div></div>
-    <div class="actions"><button class="btn soft" data-action="copy-shop">${ic('copy')}Kopiraj popis</button><button class="btn outline" data-action="hide-bought" aria-pressed="${state.hideBought}">${ic(state.hideBought ? 'eye' : 'eyeoff')}${state.hideBought ? 'Prikaži kupljeno' : 'Sakrij kupljeno'}</button>${done ? `<button class="btn outline" data-action="clear-shop">${ic('undo')}Poništi kvačice</button>` : ''}</div></section>
-  ${list || `<section class="card blank">${ic('check')}<span>Sve je kupljeno.</span></section>`}
-  <section class="card flat small muted">Količine su za sve troje prema planu (doručak, ručak, večera × 7). Povrće je očišćeno, meso sirovo, mahunarke ocijeđene. Međuobroci nisu uključeni: dodaj grčki jogurt, skyr, svježi sir, voće, bademe i whey po navici. Začini: sol, papar, origano, kumin, dimljena paprika, cimet, lovor, timijan, ružmarin, muškatni oraščić.</section>`
-    : `<section class="card blank">${ic('cart')}<span>Za ovaj tjedan još nema plana, pa nema ni popisa.</span><button class="btn primary" data-action="goto-plan" data-ws="${ws}">${ic('calendar')}Napravi plan tjedna</button></section>`}`;
-}
+function viewShopping() { return viewProcurement(); }
 
 /* ---------- Napredak ---------- */
 function personProgress(p) {
@@ -1874,6 +1861,8 @@ function trapDialogKey(e) {
 let modalSig = '', ghostTimer = null;
 function modalBody(m) {
   const close = `<button class="icon-btn" data-action="close-modal" aria-label="Zatvori">${ic('x')}</button>`;
+  if (m.type === 'shopping-item') return shoppingItemModal(m, close);
+  if (m.type === 'curated-menu') return curatedMenuModal(close);
   if (m.type === 'pick') {
     const meal = SLOTS.find(([k]) => k === m.slot)[1]; const q = searchText(state.rsearch); const cur = getPlan(m.ws).days[m.di][m.slot];
     const list = RECIPES.filter(r => r.meal === meal && (!q || searchText(r.title).includes(q) || searchText(PROT[r.protein]).includes(q)));
@@ -2125,8 +2114,17 @@ const ACTIONS = {
   'addplan-week'(t) { state.modal.ws = isoDate(addDays(parseDate(state.modal.ws || state.weekStart), 7 * +t.dataset.d)); watch('plans/' + state.modal.ws); renderModal(); },
   'toggle-shop'(t) { const ws = state.weekStart; const doc = clone(state.docs['shopping/' + ws] || { checked: {} }); doc.checked = doc.checked || {}; if (doc.checked[t.dataset.id]) delete doc.checked[t.dataset.id]; else { doc.checked[t.dataset.id] = true; buzz(); } saveDoc('shopping/' + ws, doc); },
   'hide-bought'() { state.hideBought = !state.hideBought; render(); },
-  'clear-shop'() { saveDoc('shopping/' + state.weekStart, { checked: {} }); },
-  'copy-shop'() { const tot = weekShopping(state.weekStart); const byCat = {}; Object.entries(tot).forEach(([iid, g]) => { (byCat[ING[iid].cat] = byCat[ING[iid].cat] || []).push(`- ${ING[iid].name}: ${fmtQty(iid, g)}`); }); copyText(`Popis za kupovinu · ${weekLabel(state.weekStart)}\n\n` + Object.entries(byCat).map(([c, rows]) => `${CATS[c]}\n${rows.sort().join('\n')}`).join('\n\n')); },
+  'clear-shop'() { saveDoc('shopping/' + state.weekStart, { ...clone(state.docs['shopping/' + state.weekStart] || {}), checked: {} }); },
+  'copy-shop'() { copyText(shoppingText()); },
+  'download-shop'() { downloadShopping(); },
+  'purchase-mode'(t) { state.shopMode = t.dataset.mode === 'month' ? 'month' : 'week'; LS.set('zns:shopMode', state.shopMode); state.hideBought = false; render(); },
+  'purchase-period'(t) { state.weekStart = isoDate(addDays(parseDate(state.weekStart), (state.shopMode === 'month' ? 28 : 7) * +t.dataset.d)); render(); },
+  'purchase-week'(t) { state.shopMode = 'week'; state.weekStart = t.dataset.ws; LS.set('zns:shopMode', 'week'); render(); scrollTop(); },
+  'purchase-check'(t) { togglePurchase(t.dataset.id, t.dataset.mode, t.dataset.start); },
+  'purchase-edit'(t) { state.modal = { type:'shopping-item', title:'Pakiranje i zaliha', id:t.dataset.id, iid:t.dataset.id, mode:t.dataset.mode, start:t.dataset.start }; renderModal(); },
+  'curated-preview'() { state.modal = { type:'curated-menu', title:'Pripremljeni jelovnik' }; renderModal(); },
+  async 'apply-curated'(t) { if(state.applyingMenu)return; state.applyingMenu=true; try { await applyCuratedMenu(+t.dataset.count); } finally { state.applyingMenu=false; } },
+  'restore-curated'() { confirmModal('Vratiti prethodni jelovnik?', 'Zamjenjuje planove za datume posljednjeg postavljanja pripremljenog jelovnika. Novije izmjene tih tjedana bit će zamijenjene spremljenom kopijom.', 'Vrati prethodni plan', () => restorePreparedMenu()); },
   'copy-prompt'(t) { copyText(RB[t.dataset.id].img); },
   'del-entry'(t) { const date = t.dataset.date, who = t.dataset.p || 'T'; confirmModal('Obrisati unos?', `${fmtDateLong(date)} · ${pname(who)}`, 'Obriši', () => { const log = clone(getLog(date)); delete log[who]; const other = who === 'T' ? 'S' : 'T'; if ((log[other] && Object.keys(log[other]).length) || (log.meals && Object.values(log.meals).some(Boolean))) saveLog(log); else deleteLog(date); }); },
   export() { copyText(JSON.stringify(exportData(), null, 1)); },
@@ -2191,7 +2189,11 @@ document.addEventListener('change', async e => {
 document.addEventListener('submit', e => {
   const f = e.target; e.preventDefault();
   const num = v => { const x = parseFloat(String(v || '').replace(',', '.')); return isNaN(x) ? null : Math.round(x * 10) / 10; };
-  if (f.dataset.action === 'quick-log') {
+  if (f.dataset.action === 'save-purchase-item') {
+    const ok = saveShoppingItem(f.dataset.id, f.dataset.mode, f.dataset.start, { pack:fv(f,'pack'), stock:fv(f,'stock'), storage:fv(f,'storage'), weeklyPacks:fv(f,'weeklyPacks') });
+    if (!ok) return toast('Unesi valjanu količinu. Jaja se unose u cijelim komadima.', 'info');
+    closeModal(); render(); toast('Pakiranje i zaliha su spremljeni.');
+  } else if (f.dataset.action === 'quick-log') {
     const log = clone(getLog(state.date));
     for (const p of ADULTS) {
       const w = num(fv(f, 'weight-' + p)), wa = num(fv(f, 'waist-' + p)); const tb = document.getElementById('q-training-' + p);

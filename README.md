@@ -20,12 +20,24 @@ node --test tests/*.test.cjs
 
 - `index.html`: izvorna baza namirnica i recepata te logika aplikacije.
 - `experience.css`: vizualni izgled i prilagodbe mobitelu/računalu.
+- `shopping.js`: kupovina prema pakiranjima, početna zaliha, četverotjedni pregled i postavljanje pripremljenog jelovnika.
+- `shopping-data.js`: primjeri pakiranja i ugrađeni jelovnik; ažurirati zajedno s izvornim podacima u `data/`.
+- `data/four-week-menu.json`: 84 obroka za 2.–29. studenoga 2026.
+- `data/shopping-storage-sources.json`: izvori za čuvanje hrane i pravila izračuna kupovine.
 - `assets/meals/`: optimizirane AI slike, manifest i opis generiranja.
 - `data/recipe-sources.json`: izvori šest recepata s kvinojom, heljdom i tofuom te USDA podataka.
 - `data/beef-recipe-sources.json`: izvori šest jela s ramstekom, biftekom i junećom plećkom, profili komada mesa i upute za pečenje.
 - `sw.js`: offline aplikacija i predmemorija pregledanih slika.
 
-Postojeći ključevi `zns:` u localStorage ostaju isti. Favoriti su dio `settings/main` i uključeni su u postojeći izvoz/uvoz. Izbor teme čuva se na uređaju. Nova verzija ne mijenja spremljeni plan, dnevnik, imena ili omjere porcija.
+Postojeći ključevi `zns:` u localStorage ostaju isti. Favoriti i postavke pakiranja dio su `settings/main` i uključeni su u izvoz/uvoz. Izbor teme čuva se na uređaju. Sama nadogradnja ne mijenja spremljeni plan, dnevnik, imena ili omjere porcija. Gumb za postavljanje pripremljenog jelovnika mijenja samo odabrane datume i sprema prethodne planove i tjedne popise u `planner/latest` za povrat. Ponovno postavljanje već jednakog jelovnika čuva tu kopiju.
+
+## Tjedna i velika kupovina
+
+Velika kupovina obuhvaća četiri stvarna plana od odabranog ponedjeljka. Za ostavu i zamrzivač potrebe se zbrajaju prije zaokruživanja na pakiranja; svježe namirnice prikazuju se odvojeno za svaki tjedan. Iznimka su konzerve i slična pakiranja koja kratko traju nakon otvaranja: njihove zadane postavke zaokružuju svaki tjedan zasebno. Korisnik može promijeniti pakiranje i način čuvanja svake namirnice.
+
+Početna zaliha čuva se u `shopping/YYYY-MM-DD.stock`, zajednički za tjedni i četverotjedni pregled s istim početnim datumom. Oduzima se jednom. Kvačice u `shopping/` i `shopping-month/` označavaju kupnju, ali ne mijenjaju zalihu. Prikazani ostatak je projekcija, a za novo razdoblje unosi se stvarna dostupna zaliha. Promjena potrebnih količina poništava valjanost starih kvačica. Svi ovi podaci i kopija plana uključeni su u izvoz/uvoz.
+
+Popisi pokrivaju planirane doručke, ručkove i večere za postojeće obiteljske porcije; međuobroci i začini po ukusu nisu uključeni. Konzerve koriste ocijeđenu masu, a jaja se prikazuju u komadima. Ulje i soja umak u receptima koriste grame pa se mililitri s boce ne pretvaraju automatski u grame. Pakiranja su promjenjivi primjeri, ne tvrdnje o dostupnosti kod trgovaca.
 
 Fotografije su AI ilustracije načina posluživanja, a ne dokumentacija skuhanih jela. Novi recepti imaju poveznice na izvorne objavljene recepte i opisuju obiteljske prilagodbe; prilagodbe nisu zasebno kuhinjski testirane. Nutritivne vrijednosti su procjene prema sirovim/suhim namirnicama. Nedostajući podaci u USDA bazi ostaju označeni kao `null`; zbrojevi mogu biti nepotpuni.
 

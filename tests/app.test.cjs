@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 const base = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(base, 'index.html'), 'utf8');
-const script = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].slice(1).map(m => m[1]).join('\n').replace(/\nboot\(\);\s*$/, '\n');
+const script = [...html.matchAll(/<script(?: src="([^"]+)")?>([\s\S]*?)<\/script>/g)].slice(1).map(m => m[1] ? fs.readFileSync(path.join(base,m[1]),'utf8') : m[2]).join('\n').replace(/\nboot\(\);\s*$/, '\n');
 function app() {
   const storage = new Map();
   const context = vm.createContext({
@@ -142,4 +142,90 @@ test('beef filters include existing mince and keep steak cuts separate in shoppi
   run("setSlot(state.weekStart,1,'l','R14')");
   assert.equal(run('weekShopping(state.weekStart).biftek'),undefined);
   assert.equal(run('weekShopping(state.weekStart).ramstek'),run('wholeOf(RB.R14).ramstek*2'));
+});
+
+test('packages round the whole four-week need once and subtract opening stock once', () => {
+  const run=app();
+  for(const [need,stock,pack,buy,left] of [[350,0,1000,1000,650],[1400,0,1000,2000,600],[1400,650,1000,1000,250],[350,400,1000,0,50],[0,0,1000,0,0],[1000.00000001,0,1000,1000,0]]) {
+    const result=run(`purchaseAmounts(${need},${stock},${pack})`);
+    assert.equal(result.buy,buy);assert.ok(Math.abs(result.leftover-left)<1e-6);
+  }
+  assert.equal(run('purchaseAmounts(750,0,500,50).buy'),1000); // 15 eggs -> 2 x 10
+  assert.equal(run('purchaseAmounts(125,0,0,50).buy'),150); // loose eggs remain whole
+  assert.equal(run('purchaseAmounts(320,0,240).buy'),480); // edible drained can weight
+});
+test('prepared month includes requested ingredients, distinct weekly meals and all twelve additions', () => {
+  const run=app(),menu=run('CURATED_MENU'),recipes=run('RB');
+  assert.equal(menu.weeks.length,4);
+  const ids=new Set();
+  for(const week of menu.weeks) {
+    assert.equal(week.days.length,7);
+    assert.equal(new Set(week.days.flatMap(d=>[d.b,d.l,d.v])).size,21);
+    for(const d of week.days)for(const [slot,meal] of [['b','dorucak'],['l','rucak'],['v','vecera']]) {assert.equal(recipes[d[slot]].meal,meal);ids.add(d[slot]);}
+    assert.equal(week.days.flatMap(d=>[d.b,d.l,d.v]).filter(id=>recipes[id].protein==='crveno').length,2);
+  }
+  const firstIngredients=new Set(menu.weeks[0].days.flatMap(d=>[d.b,d.l,d.v]).flatMap(id=>recipes[id].batch.map(e=>e[1])));
+  for(const iid of ['ramstek','biftek','kvinoja','heljda','tofu'])assert.ok(firstIngredients.has(iid));
+  for(const id of ['R11','R12','R13','V11','V12','V13','R14','R15','R16','V14','V15','V16'])assert.ok(ids.has(id));
+});
+test('monthly procurement reads four actual plans, not four copies of the first', () => {
+  const run=app();
+  run("CURATED_MENU.weeks.forEach(w=>state.docs['plans/'+w.week]=w);state.weekStart=CURATED_MENU.start");
+  const row=run("shoppingRow('riza_integralna',CURATED_MENU.start,'month')");
+  assert.equal(row.need,160);assert.equal(row.buy,1000);
+  assert.notEqual(row.need,run('weekShopping(CURATED_MENU.start).riza_integralna*4'));
+  run("state.docs['shopping/'+CURATED_MENU.start]={stock:{riza_integralna:650}}");
+  assert.equal(run("shoppingRow('riza_integralna',CURATED_MENU.start,'month').buy"),0);
+  assert.equal(run("shoppingRow('riza_integralna',CURATED_MENU.start,'month').leftover"),490);
+  assert.equal(run("openingStock('riza_integralna','month','2026-11-30')"),0);
+});
+test('short-lived opened packs round by week while dry grains aggregate across weeks', () => {
+  const run=app();
+  run("shoppingWeeks('2026-11-02').forEach(ws=>state.docs['plans/'+ws]=emptyPlan(ws));setSlot('2026-11-02',0,'l','R11');setSlot('2026-11-16',0,'l','R11')");
+  const cans=run("shoppingRow('slanutak','2026-11-02','month')");
+  assert.equal(cans.need,640);assert.equal(cans.packages,4);
+  assert.equal(run("shoppingRow('kvinoja','2026-11-02','month').packages"),1);
+  run("state.docs['settings/main']={shoppingPrefs:{items:{slanutak:{weeklyPacks:false}}}}");
+  assert.equal(run("shoppingRow('slanutak','2026-11-02','month').packages"),3);
+});
+test('package and stock editing preserves settings, converts egg units and survives export/import', () => {
+  const run=app();run("state.docs['settings/main']={names:{T:'Test'},favorites:['R14']}");
+  assert.ok(run("saveShoppingItem('jaja','month','2026-11-02',{pack:10,stock:3,storage:'fresh',weeklyPacks:'yes'})"));
+  assert.equal(run("shoppingPolicy('jaja').packSize"),500);
+  assert.equal(run("openingStock('jaja','month','2026-11-02')"),150);
+  assert.equal(run("openingStock('jaja','week','2026-11-02')"),150);
+  assert.ok(!run("saveShoppingItem('jaja','week','2026-11-02',{pack:2.5,stock:0,storage:'fresh'})"));
+  const exported=run('JSON.stringify(exportData())');run('closeModal=()=>{};state.docs={}');run(`importData(${JSON.stringify(exported)})`);
+  assert.equal(run("settings().names.T"),'Test');assert.ok(run("favorites().has('R14')"));
+  assert.equal(run("openingStock('jaja','week','2026-11-02')"),150);
+});
+test('purchase ticks do not add stock and become stale after quantity changes', () => {
+  const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'v','V15')");
+  run("togglePurchase('riza_integralna','month','2026-11-02')");
+  assert.ok(run("shoppingMarkMatches(shoppingRow('riza_integralna','2026-11-02','month'))"));
+  assert.equal(run("openingStock('riza_integralna','month','2026-11-02')"),0);
+  run("setSlot('2026-11-02',1,'v','V15')");
+  assert.ok(!run("shoppingMarkMatches(shoppingRow('riza_integralna','2026-11-02','month'))"));
+});
+test('prepared plans can be applied, exported and restored without overwriting unrelated dates', async () => {
+  const run=app();
+  run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'l','R15');state.docs['plans/2026-12-07']=emptyPlan('2026-12-07');setSlot('2026-12-07',0,'l','R14');state.docs['shopping/2026-11-02']={checked:{jaja:true},stock:{jaja:100}};persist('shopping/2026-11-02',state.docs['shopping/2026-11-02'])");
+  await run('applyCuratedMenu(4)');
+  assert.equal(run("getPlan('2026-11-02').days[0].l"),'R11');assert.equal(run('weekFilled("2026-11-23")'),21);
+  assert.equal(run("getPlan('2026-12-07').days[0].l"),'R14');
+  assert.ok(run("exportData().docs['planner/latest']"));
+  await run('applyCuratedMenu(4)');
+  assert.equal(run("state.docs['planner/latest'].plans['2026-11-02'].days[0].l"),'R15');
+  await run('restorePreparedMenu()');
+  assert.equal(run("getPlan('2026-11-02').days[0].l"),'R15');
+  assert.equal(run("state.docs['shopping/2026-11-02'].checked.jaja"),true);
+  assert.equal(run("state.docs['shopping/2026-11-02'].stock.jaja"),100);
+});
+test('monthly screen and copied list separate bulk shopping from each fresh week', () => {
+  const run=app();run("CURATED_MENU.weeks.forEach(w=>state.docs['plans/'+w.week]=w);state.weekStart=CURATED_MENU.start;state.shopMode='month'");
+  const text=run('shoppingText()');assert.ok(text.includes('ZA OSTAVU')&&text.includes('ZA ZAMRZIVAČ'));
+  assert.equal((text.match(/SVJEŽE · /g)||[]).length,4);
+  const html=run('viewProcurement()');assert.ok(html.includes('84/84')&&html.includes('Svježe kupuj svaki tjedan.'));
+  run("state.docs['plans/2026-11-23']=emptyPlan('2026-11-23')");
+  assert.ok(run('viewProcurement()').includes('Nedostaje 21 obroka'));
 });

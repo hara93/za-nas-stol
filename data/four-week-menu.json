@@ -1,0 +1,207 @@
+{
+  "title": "Četiri raznolika tjedna za naš stol",
+  "start": "2026-11-02",
+  "weeks": [
+    {
+      "week": "2026-11-02",
+      "days": [
+        {
+          "b": "D01",
+          "l": "R11",
+          "v": "V10",
+          "montaza": false
+        },
+        {
+          "b": "D02",
+          "l": "R01",
+          "v": "V13",
+          "montaza": false
+        },
+        {
+          "b": "D03",
+          "l": "R12",
+          "v": "V09",
+          "montaza": false
+        },
+        {
+          "b": "D07",
+          "l": "R13",
+          "v": "V15",
+          "montaza": false
+        },
+        {
+          "b": "D10",
+          "l": "R08",
+          "v": "V07",
+          "montaza": false
+        },
+        {
+          "b": "D04",
+          "l": "R14",
+          "v": "V11",
+          "montaza": false
+        },
+        {
+          "b": "D06",
+          "l": "R07",
+          "v": "V05",
+          "montaza": false
+        }
+      ]
+    },
+    {
+      "week": "2026-11-09",
+      "days": [
+        {
+          "b": "D09",
+          "l": "R10",
+          "v": "V12",
+          "montaza": false
+        },
+        {
+          "b": "D10",
+          "l": "R13",
+          "v": "V07",
+          "montaza": false
+        },
+        {
+          "b": "D04",
+          "l": "R15",
+          "v": "V05",
+          "montaza": false
+        },
+        {
+          "b": "D01",
+          "l": "R06",
+          "v": "V13",
+          "montaza": false
+        },
+        {
+          "b": "D02",
+          "l": "R11",
+          "v": "V10",
+          "montaza": false
+        },
+        {
+          "b": "D03",
+          "l": "R03",
+          "v": "V09",
+          "montaza": false
+        },
+        {
+          "b": "D07",
+          "l": "R16",
+          "v": "V01",
+          "montaza": false
+        }
+      ]
+    },
+    {
+      "week": "2026-11-16",
+      "days": [
+        {
+          "b": "D03",
+          "l": "R12",
+          "v": "V13",
+          "montaza": false
+        },
+        {
+          "b": "D09",
+          "l": "R13",
+          "v": "V14",
+          "montaza": false
+        },
+        {
+          "b": "D10",
+          "l": "R11",
+          "v": "V03",
+          "montaza": false
+        },
+        {
+          "b": "D07",
+          "l": "R06",
+          "v": "V05",
+          "montaza": false
+        },
+        {
+          "b": "D01",
+          "l": "R01",
+          "v": "V12",
+          "montaza": false
+        },
+        {
+          "b": "D02",
+          "l": "R04",
+          "v": "V11",
+          "montaza": false
+        },
+        {
+          "b": "D06",
+          "l": "R02",
+          "v": "V16",
+          "montaza": false
+        }
+      ]
+    },
+    {
+      "week": "2026-11-23",
+      "days": [
+        {
+          "b": "D05",
+          "l": "R11",
+          "v": "V10",
+          "montaza": false
+        },
+        {
+          "b": "D08",
+          "l": "R08",
+          "v": "V13",
+          "montaza": false
+        },
+        {
+          "b": "D04",
+          "l": "R09",
+          "v": "V04",
+          "montaza": false
+        },
+        {
+          "b": "D10",
+          "l": "R13",
+          "v": "V09",
+          "montaza": false
+        },
+        {
+          "b": "D09",
+          "l": "R12",
+          "v": "V07",
+          "montaza": false
+        },
+        {
+          "b": "D03",
+          "l": "R06",
+          "v": "V06",
+          "montaza": false
+        },
+        {
+          "b": "D07",
+          "l": "R07",
+          "v": "V01",
+          "montaza": false
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Plan pokriva 28 dana, od 2. do 29. studenoga 2026.; to su četiri tjedna za kupovinu, a ne cijeli kalendarski studeni.",
+    "Prvi tjedan: kvinoja u ponedjeljak i srijedu, tofu u utorak, kremasta heljda i biftek u četvrtak, ramstek u subotu. Riblji obroci su losos u utorak i srdele u petak.",
+    "Svaki tjedan sadrži 21 različit recept, dva obroka s junetinom i četiri s peradi. Ručak i večera uvijek imaju različit glavni izvor proteina.",
+    "Doručci se izmjenjuju slatko/slano kroz svih 28 dana; raspored koristi svih 10 postojećih doručaka.",
+    "U prva tri tjedna su po dva riblja ručka/večere. U četvrtom tjednu riblji obroci su tost s dimljenim lososom u ponedjeljak za doručak i tjestenina sa srdelama u petak za večeru.",
+    "Sporo pirjana plećka je u nedjelju 15. studenoga, a gulaš s heljdom u nedjelju 22. studenoga. Jela radnim danom traju najviše 45 minuta prema vremenu u receptima.",
+    "Svih 12 novih recepata s kvinojom, heljdom, tofuom i junetinom uključeno je do kraja trećeg tjedna. Ukupno se kroz četiri tjedna izmjenjuje 39 postojećih recepata.",
+    "Ponavljanja između tjedana namjerna su: 84 obroka nije moguće popuniti s 42 recepta bez ponavljanja. Nema ponavljanja unutar pojedinog tjedna.",
+    "Plan određuje samo recepte i dane. Postojeće obiteljske porcije, raspodjela, ciljevi i odabrani međuobroci ostaju prema postavkama aplikacije.",
+    "Svi dani imaju montaza:false jer nisu navedeni terenski dani; korisnik ih može označiti i zamijeniti ručak hladnim jelom.",
+    "Popis za kupovinu treba zbrojiti ova četiri različita tjedna. Količine za 28 dana ne dobivaju se množenjem samo prvog tjedna s četiri."
+  ]
+}

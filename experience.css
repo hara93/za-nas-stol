@@ -213,3 +213,23 @@ nav.tabs button[aria-current="page"]{font-weight:800}
 .start-week{display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--sea-soft)}
 .start-week p{margin-top:5px}
 @media(max-width:560px){.start-week{align-items:stretch;flex-direction:column}.start-week .btn{align-self:flex-start}}
+
+/* Package-aware shopping and the prepared menu. */
+.menu-invite{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--sea-soft)}
+.menu-invite h3{margin:4px 0 6px}.menu-invite .btn{flex:none}
+.purchase-overview{display:flex;justify-content:space-between;gap:24px;align-items:center}
+.purchase-overview h2{margin:7px 0}.purchase-overview .actions{justify-content:flex-end}
+.procurement-group .sect-h{align-items:flex-start;margin-bottom:16px}.procurement-group .sect-h p{margin-top:5px;max-width:640px}
+.purchase-list{list-style:none;padding:0;margin:0}.purchase-row{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(110px,auto);gap:12px;padding:19px 0;border-top:1px solid var(--line);align-items:start}
+.purchase-check{width:34px;min-height:38px;display:grid;place-items:center}.purchase-check:disabled{opacity:.55}
+.purchase-info{min-width:0}.purchase-info>b{font-size:.94rem;line-height:1.45;display:block}.purchase-math{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.76rem;color:var(--muted);margin-top:7px}.purchase-math strong{font-weight:600}
+.purchase-edit{min-height:34px;font-size:.74rem;margin-top:2px}.purchase-amount{display:grid;gap:4px;text-align:right;padding-top:3px}.purchase-amount small{font-size:.69rem;color:var(--muted)}.purchase-amount strong{font-size:1rem;color:var(--sea);white-space:nowrap}
+.purchase-row.purchased .purchase-info>b{text-decoration:line-through;color:var(--muted)}.purchase-row.stocked .purchase-amount strong{color:var(--muted)}
+.fresh-week summary,.procurement-help summary,.curated-weeks summary{display:flex;gap:12px;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;min-height:36px;font-weight:600}
+.fresh-week summary::-webkit-details-marker,.procurement-help summary::-webkit-details-marker,.curated-weeks summary::-webkit-details-marker{display:none}.fresh-week[open] summary,.curated-weeks details[open] summary{margin-bottom:20px}
+.fresh-week summary svg,.procurement-help summary svg,.curated-weeks summary svg{width:18px;flex:none}.procurement-help details[open] summary{margin-bottom:16px}.procurement-help p{font-size:.85rem;color:var(--muted);line-height:1.65}.procurement-help a{color:var(--sea);text-decoration:underline}
+.curated-weeks{display:grid;gap:16px}.curated-weeks details{border:1px solid var(--line);border-radius:12px;padding:14px}.menu-table-wrap{overflow-x:auto}.menu-table{min-width:610px}.menu-table td{vertical-align:top;font-size:.78rem;line-height:1.5;min-width:160px;white-space:normal}.menu-table th{font-size:.72rem;vertical-align:top}.sheet:has(.curated-weeks){width:min(1000px,96vw);max-width:1000px}
+@media(max-width:759px){
+ .menu-invite,.purchase-overview{align-items:stretch;flex-direction:column}.menu-invite .btn{align-self:flex-start}.purchase-overview .actions{justify-content:flex-start}
+ .purchase-row{grid-template-columns:28px minmax(0,1fr);gap:8px 9px;padding:16px 0}.purchase-check{width:28px}.purchase-info>b{font-size:.9rem}.purchase-amount{grid-column:2;display:flex;align-items:baseline;justify-content:flex-start;gap:8px;text-align:left;padding-top:0;flex-wrap:wrap}.purchase-amount strong{font-size:1rem}.purchase-math{font-size:.72rem;gap:4px 10px}.purchase-edit{font-size:.73rem;min-height:36px}.procurement-group .sect-h{flex-wrap:wrap;gap:8px}.fresh-week summary{font-size:.85rem}.fresh-weeks h2{font-size:1.3rem}.sheet:has(.curated-weeks){width:100%;max-width:100%}
+}
