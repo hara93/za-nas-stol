@@ -5,12 +5,13 @@ const vm = require('node:vm');
 const path = require('node:path');
 const base = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(base, 'index.html'), 'utf8');
-const script = [...html.matchAll(/<script(?: src="([^"]+)")?>([\s\S]*?)<\/script>/g)].slice(1).map(m => m[1] ? fs.readFileSync(path.join(base,m[1]),'utf8') : m[2]).join('\n').replace(/\nboot\(\);\s*$/, '\n');
+const script = [...html.matchAll(/<script(?: src="([^"]+)")?>([\s\S]*?)<\/script>/g)].slice(1).map(m => m[1] ? fs.readFileSync(path.join(base,m[1].split('?')[0]),'utf8') : m[2]).join('\n').replace(/\nboot\(\);\s*$/, '\n');
 function app() {
   const storage = new Map();
+  const events = {};
   const context = vm.createContext({
-    console, setTimeout, clearTimeout, setInterval, clearInterval, URL,
-    document: { addEventListener() {} }, window: { addEventListener() {} },
+    console, setTimeout, clearTimeout, setInterval, clearInterval, URL, testEvents: events,
+    document: { addEventListener(type, fn) { (events[type] ||= []).push(fn); }, querySelector() { return null; } }, window: { addEventListener() {} },
     navigator: {}, location: { hash: '', hostname: 'test', protocol: 'http:' },
     localStorage: { getItem:k=>storage.get(k)??null, setItem:(k,v)=>storage.set(k,v), removeItem:k=>storage.delete(k), key:i=>[...storage.keys()][i], get length(){return storage.size;} }
   });
@@ -228,4 +229,48 @@ test('monthly screen and copied list separate bulk shopping from each fresh week
   const html=run('viewProcurement()');assert.ok(html.includes('84/84')&&html.includes('Svježe kupuj svaki tjedan.'));
   run("state.docs['plans/2026-11-23']=emptyPlan('2026-11-23')");
   assert.ok(run('viewProcurement()').includes('Nedostaje 21 obroka'));
+});
+test('menu editor changes stay in draft and saving the selected week updates only that week', async () => {
+  const run=app();run('renderModal=()=>{}');await run('applyCuratedMenu(4)');
+  run("state.weekStart='2026-11-02';togglePurchase('kvinoja','week','2026-11-02')");
+  const before=run("JSON.stringify(getPlan('2026-11-02'))"),need=run("weekShopping('2026-11-09').kvinoja||0");
+  await run('openCuratedEditor()');run("changeCuratedWeek(1);state.modal={type:'curated-pick',di:0,slot:'l'}");
+  assert.equal(run("selectCuratedMeal('D01')"),false);
+  assert.ok(run("selectCuratedMeal('R11')"));
+  assert.equal(run("weekShopping('2026-11-09').kvinoja||0"),need);
+  assert.equal(run("JSON.stringify(getPlan('2026-11-02'))"),before);
+  await run('applyCuratedMenu(1)');
+  assert.equal(run("getPlan('2026-11-09').days[0].l"),'R11');
+  assert.equal(run("JSON.stringify(getPlan('2026-11-02'))"),before);
+  assert.ok(run("shoppingMarkMatches(shoppingRow('kvinoja','2026-11-02'))"));
+  assert.equal(run('state.weekStart'),'2026-11-09');
+  await run('openCuratedEditor()');assert.equal(run('state.curatedEditor.weeks[1].days[0].l'),'R11');
+  assert.ok(run('curatedMenuModal("")').includes('Spremi 2. tjedan'));
+  assert.ok(!run('curatedMenuModal("")').includes('<table'));
+  await run('restorePreparedMenu()');assert.equal(run("weekShopping('2026-11-09').kvinoja||0"),need);
+});
+test('saving all four weeks retains replacements and reopening includes existing manual plan edits', async () => {
+  const run=app();run('renderModal=()=>{}');await run('applyCuratedMenu(4)');
+  run("setSlot('2026-11-16',3,'v','V15')");await run('openCuratedEditor()');
+  assert.equal(run('state.curatedEditor.weeks[2].days[3].v'),'V15');
+  run("changeCuratedWeek(3);state.modal={type:'curated-pick',di:6,slot:'v'};selectCuratedMeal('V12')");
+  await run('applyCuratedMenu(4)');
+  assert.equal(run("getPlan('2026-11-23').days[6].v"),'V12');
+  assert.equal(run("getPlan('2026-11-16').days[3].v"),'V15');
+  assert.ok(run("weekShopping('2026-11-23').tofu")>0);
+});
+test('shopping uses labelled checkboxes and remaining group counts exclude purchased rows', () => {
+  const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'l','R11')");
+  const row=run("shoppingRow('kvinoja','2026-11-02')");
+  assert.match(run("procurementRowHtml(shoppingRow('kvinoja','2026-11-02'))"),/<label class="purchase-select"><input type="checkbox"/);
+  run("togglePurchase('kvinoja','week','2026-11-02')");
+  assert.ok(run("procurementSection('Test','',[shoppingRow('kvinoja','2026-11-02')],'test')").includes('0 još za kupiti'));
+  assert.ok(run("procurementRowHtml(shoppingRow('kvinoja','2026-11-02'))").includes('checked'));
+});
+test('dialog backdrop does not swallow native controls inside the dialog', () => {
+  const run=app();
+  run("let prevented=false,closed=false;closeModal=()=>{closed=true};const backdrop={tagName:'DIV',dataset:{action:'close-modal-bg'},closest:s=>s==='[data-action]'?backdrop:null};const summary={closest:()=>backdrop};testEvents.click.forEach(fn=>fn({target:summary,preventDefault(){prevented=true}}))");
+  assert.equal(run('prevented'),false);assert.equal(run('closed'),false);
+  run("testEvents.click.forEach(fn=>fn({target:backdrop,preventDefault(){prevented=true}}))");
+  assert.equal(run('closed'),true);
 });

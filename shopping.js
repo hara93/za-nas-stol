@@ -72,15 +72,15 @@ function procurementRowHtml(row) {
   const {iid,mode,start,policy}=row, done=shoppingMarkMatches(row), enough=row.buy===0;
   if(state.hideBought && (done||enough))return '';
   return `<li class="purchase-row ${done?'purchased':''} ${enough?'stocked':''}" data-key="${mode}-${start}-${iid}">
-    <button class="purchase-check" data-action="purchase-check" data-id="${iid}" data-mode="${mode}" data-start="${start}" aria-pressed="${done}" aria-label="${done?'Označi kao nekupljeno':'Označi kupljeno'}: ${esc(ING[iid].name)}" ${enough?'disabled':''}><span class="check sm ${done||enough?'on':''}">${ic('check','')}</span></button>
-    <div class="purchase-info"><b>${esc(ING[iid].name)}</b><div class="purchase-math"><span>Potrebno <strong>${shoppingQuantity(iid,row.need)}</strong></span>${row.stock?`<span>Imam ${shoppingQuantity(iid,row.stock)}</span>`:''}<span>${policy.weeklyPacks&&mode==='month'?'Višak pakiranja':'Ostaje'} ${shoppingQuantity(iid,row.leftover)}</span></div>${policy.weeklyPacks&&mode==='month'?'<small class="muted">Pakiranja po tjednima · otvoreni višak potroši prema deklaraciji.</small>':''}
-    <button class="text-btn purchase-edit" data-action="purchase-edit" data-id="${iid}" data-mode="${mode}" data-start="${start}">Pakiranje i zaliha</button></div>
-    <div class="purchase-amount"><small>${enough?'Već imaš dovoljno':done?'Kupljeno':'Kupiti'}</small><strong>${enough?'—':shoppingBuyLabel(row)}</strong>${row.packages!==null&&!enough?`<small>ukupno ${shoppingQuantity(iid,row.buy)}</small>`:policy.packSize===0&&!enough?'<small>na vagu / prilagodi pakiranje</small>':''}</div></li>`;
+    <label class="purchase-select"><input type="checkbox" class="purchase-checkbox" data-action="purchase-check" data-id="${iid}" data-mode="${mode}" data-start="${start}" aria-label="Kupljeno: ${esc(ING[iid].name)}" ${done||enough?'checked':''} ${enough?'disabled':''}>
+    <span class="purchase-info"><b>${esc(ING[iid].name)}</b><span class="purchase-amount"><span>${enough?'Već imaš dovoljno':done?'Kupljeno':'Kupiti'}</span> <strong>${enough?'Na zalihi':shoppingBuyLabel(row)}</strong>${row.packages!==null&&!enough?`<small>ukupno ${shoppingQuantity(iid,row.buy)}</small>`:''}</span></span></label>
+    <div class="purchase-details"><div class="purchase-math"><span>Potrebno <strong>${shoppingQuantity(iid,row.need)}</strong></span>${row.stock?`<span>Imam ${shoppingQuantity(iid,row.stock)}</span>`:''}<span>${policy.weeklyPacks&&mode==='month'?'Višak pakiranja':'Ostaje'} ${shoppingQuantity(iid,row.leftover)}</span></div>${policy.weeklyPacks&&mode==='month'?'<p class="purchase-note">Pakiranja po tjednima · otvoreni višak potroši prema deklaraciji.</p>':''}
+    <button class="text-btn purchase-edit" data-action="purchase-edit" data-id="${iid}" data-mode="${mode}" data-start="${start}">Pakiranje i zaliha</button></div></li>`;
 }
 function procurementSection(title,description,rows,key) {
   const html=rows.map(procurementRowHtml).join('');
   if(!rows.length)return '';
-  return `<section class="card procurement-group" data-key="${key}"><div class="sect-h"><div><h3>${title}</h3><p class="small muted">${description}</p></div><span class="chip tag">${rows.filter(r=>r.buy>0).length} za kupiti</span></div><ul class="purchase-list">${html||'<li class="small muted">Sve stavke ove grupe su kupljene ili na zalihi.</li>'}</ul></section>`;
+  return `<section class="card procurement-group" data-key="${key}"><div class="sect-h"><div><h3>${title}</h3><p class="small muted">${description}</p></div><span class="chip tag">${rows.filter(r=>r.buy>0&&!shoppingMarkMatches(r)).length} još za kupiti</span></div><ul class="purchase-list">${html||'<li class="small muted">Sve stavke ove grupe su kupljene ili na zalihi.</li>'}</ul></section>`;
 }
 function viewProcurement() {
   const start=state.weekStart,monthly=state.shopMode==='month',weeks=monthly?shoppingWeeks(start):[start];
@@ -144,27 +144,72 @@ function downloadShopping() {
 function curatedBanner() {
   return `<section class="card menu-invite"><div><span class="eyebrow">Pripremljeno za vas · ${shoppingRange(CURATED_MENU.start)}</span><h3>Četiri tjedna raznolikih obroka.</h3><p class="small muted">Ramstek, biftek, kvinoja, heljda i tofu, uz ribu, perad i obiteljske favorite.</p></div><button class="btn primary" data-action="curated-preview">Pogledaj jelovnik</button></section>`;
 }
+async function openCuratedEditor() {
+  const previous=await fetchDoc('planner/latest');
+  const saved=await Promise.all(CURATED_MENU.weeks.map(w=>fetchDoc('plans/'+w.week)));
+  const hasSavedMenu=CURATED_MENU.weeks.some(w=>previous?.plans?.[w.week]) || saved.some(w=>w?.prepared);
+  const weeks=CURATED_MENU.weeks.map((w,i)=>clone(hasSavedMenu&&saved[i]?.days?.length===7?saved[i]:w));
+  const index=Math.max(0,weeks.findIndex(w=>w.week===state.weekStart));
+  state.curatedEditor={weeks,index,dirty:false};
+  state.modal={type:'curated-menu',title:'Uredi jelovnik'};renderModal();
+}
+function changeCuratedWeek(index) {
+  if(!state.curatedEditor||!Number.isInteger(index)||index<0||index>=4)return;
+  state.curatedEditor.index=index;renderModal();
+  document.querySelector('.menu-scroll')?.scrollTo({top:0});
+}
 function curatedMenuModal(close) {
-  return `<div class="sh"><div><span class="eyebrow">${shoppingRange(CURATED_MENU.start)} · 84 obroka</span><h3>Vaš pripremljeni jelovnik</h3></div>${close}</div><p class="small muted">Svaki tjedan ima 21 različit recept. Postavljanje mijenja obroke samo za ove datume i sprema prethodni plan za povrat.</p><div class="curated-weeks">${CURATED_MENU.weeks.map((w,wi)=>`<details ${wi===0?'open':''}><summary><b>${wi+1}. tjedan · ${weekLabel(w.week)}</b>${ic('down')}</summary><div class="menu-table-wrap"><table class="tbl menu-table"><thead><tr><th>Dan</th><th>Doručak</th><th>Ručak</th><th>Večera</th></tr></thead><tbody>${w.days.map((d,i)=>`<tr><th>${DAYS_LONG[i]}</th>${SLOTS.map(([slot])=>`<td>${esc(RB[d[slot]].title)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`).join('')}</div><div class="actions"><button class="btn primary" data-action="apply-curated" data-count="4">Postavi sva 4 tjedna</button><button class="btn outline" data-action="apply-curated" data-count="1">Samo prvi tjedan</button></div>`;
+  const editor=state.curatedEditor;if(!editor)return '';
+  const {weeks,index,dirty}=editor,w=weeks[index];
+  return `<header class="menu-editor-head"><div class="sh"><div><span class="eyebrow">${shoppingRange(CURATED_MENU.start)}</span><h3>Jelovnik po vašem ukusu.</h3></div>${close}</div><p>Dodirni obrok koji želiš zamijeniti.</p>
+    <div class="menu-week-tabs" role="group" aria-label="Odaberi tjedan">${weeks.map((week,i)=>`<button data-action="curated-week" data-index="${i}" aria-pressed="${i===index}">${i+1}. tjedan</button>`).join('')}</div>
+    <div class="menu-week-nav"><button class="icon-btn" data-action="curated-week" data-index="${index-1}" aria-label="Prethodni tjedan jelovnika" ${index===0?'disabled':''}>${ic('left')}</button><b aria-live="polite">${weekLabel(w.week)}</b><button class="icon-btn" data-action="curated-week" data-index="${index+1}" aria-label="Sljedeći tjedan jelovnika" ${index===3?'disabled':''}>${ic('right')}</button></div></header>
+    <div class="menu-scroll"><div class="menu-days">${w.days.map((d,i)=>`<article class="menu-day" data-key="menu-${w.week}-${i}"><header><h4>${DAYS_LONG[i]}</h4><span>${fmtDate(isoDate(addDays(parseDate(w.week),i)))}</span></header><div class="menu-day-meals">${SLOTS.map(([slot,meal])=>{
+      const r=RB[d[slot]];
+      return `<button class="menu-meal" data-action="curated-pick" data-di="${i}" data-slot="${slot}" aria-label="Promijeni ${lc(MEALS[meal])}, ${DAYS_LONG[i]}: ${esc(r?.title||'Odaberi obrok')}"><span class="menu-meal-photo">${r?pic(r.id):ic('plus')}</span><span class="menu-meal-copy"><small>${MEALS[meal]}${r?' · '+r.time+' min':''}</small><b>${esc(r?.title||'Odaberi obrok')}</b><span class="menu-meal-change">Zamijeni ${ic('shuffle')}</span></span></button>`;
+    }).join('')}</div></article>`).join('')}</div></div>
+    <footer class="menu-editor-footer"><p>${dirty?'Imaš nespremljene izmjene.':'Prilagodi jela pa spremi odabrani tjedan ili sva četiri.'} Kupovina se ažurira nakon spremanja.</p><div><button class="btn primary" data-action="apply-curated" data-count="4">Spremi sva 4 tjedna</button><button class="btn outline" data-action="apply-curated" data-count="1">Spremi ${index+1}. tjedan</button></div></footer>`;
+}
+function curatedPickModal(m) {
+  const editor=state.curatedEditor,w=editor.weeks[editor.index],meal=SLOTS.find(([s])=>s===m.slot)?.[1],q=searchText(state.rsearch);
+  const selected=w.days[m.di][m.slot];
+  const options=RECIPES.filter(r=>r.meal===meal&&(!q||searchText(r.title).includes(q)||searchText(PROT[r.protein]).includes(q)||r.batch.some(e=>searchText(ING[e[1]].name).includes(q))));
+  return `<header class="menu-editor-head"><div class="sh"><button class="icon-btn" data-action="curated-back" aria-label="Natrag na jelovnik">${ic('left')}</button><div class="grow"><span class="eyebrow">${DAYS_LONG[m.di]} · ${fmtDate(isoDate(addDays(parseDate(w.week),m.di)))}</span><h3>Odaberi ${lc(MEALS[meal])}</h3></div></div><div class="search">${ic('search')}<input type="search" id="rsearch" placeholder="Traži jelo ili namirnicu…" value="${esc(state.rsearch||'')}" autocomplete="off" aria-label="Traži zamjenski obrok"></div></header>
+    <div class="menu-scroll"><div class="menu-options">${options.map(r=>`<button class="menu-meal ${r.id===selected?'selected':''}" data-action="curated-select" data-id="${r.id}" aria-pressed="${r.id===selected}"><span class="menu-meal-photo">${pic(r.id)}</span><span class="menu-meal-copy"><small>${r.time} min · ${PROT[r.protein]}</small><b>${esc(r.title)}</b><span class="menu-meal-change">${r.id===selected?'Odabrano':w.days.some(d=>d[m.slot]===r.id)?'Već u ovom tjednu · odaberi':'Odaberi ovo jelo'} ${ic(r.id===selected?'check':'plus')}</span></span></button>`).join('')||'<p class="small muted">Nema jela za taj pojam. Pokušaj drugim nazivom.</p>'}</div></div>`;
+}
+function showCuratedEditor() {
+  const from=state.modal;state.modal={type:'curated-menu',title:'Uredi jelovnik'};renderModal();
+  if(from?.type==='curated-pick') {
+    const button=document.querySelector(`.menu-meal[data-di="${from.di}"][data-slot="${from.slot}"]`);
+    button?.scrollIntoView({block:'center'});button?.focus({preventScroll:true});
+  }
+}
+function selectCuratedMeal(id) {
+  const m=state.modal,editor=state.curatedEditor,r=RB[id];
+  if(m?.type!=='curated-pick'||!editor||!r||r.meal!==SLOTS.find(([s])=>s===m.slot)?.[1])return false;
+  const day=editor.weeks[editor.index].days[m.di];if(!day)return false;
+  if(day[m.slot]!==id){day[m.slot]=id;editor.dirty=true;}
+  return true;
 }
 async function applyCuratedMenu(count=4) {
-  const chosen=CURATED_MENU.weeks.slice(0,count===1?1:4),backup={saved:new Date().toISOString(),plans:{},shopping:{}};
+  const editor=state.curatedEditor,candidates=editor?.weeks||CURATED_MENU.weeks,index=editor?.index||0;
+  const chosen=count===1?[candidates[index]]:candidates,backup={saved:new Date().toISOString(),plans:{},shopping:{}};
   for(const w of chosen) {
     backup.plans[w.week]=clone(await fetchDoc('plans/'+w.week));
     backup.shopping[w.week]=clone(await fetchDoc('shopping/'+w.week));
   }
-  const alreadySet=chosen.every(w=>w.days.every((d,i)=>SLOTS.every(([slot])=>backup.plans[w.week]?.days?.[i]?.[slot]===d[slot])));
-  if(alreadySet) {
-    state.weekStart=CURATED_MENU.start;state.view='plan';state.modal=null;location.hash='plan';render();toast('Ovaj jelovnik je već postavljen.');return;
+  const changed=chosen.filter(w=>!w.days.every((d,i)=>SLOTS.every(([slot])=>backup.plans[w.week]?.days?.[i]?.[slot]===d[slot])));
+  if(changed.length) {
+    for(const w of chosen.filter(w=>!changed.includes(w))) {delete backup.plans[w.week];delete backup.shopping[w.week];}
+    state.docs['planner/latest']=backup;await persist('planner/latest',backup);
+    for(const w of changed) {
+      const previous=backup.plans[w.week],next=clone(w);next.prepared=true;
+      next.days.forEach((d,i)=>{d.montaza=!!previous?.days?.[i]?.montaza;});
+      state.docs['plans/'+w.week]=next;await persist('plans/'+w.week,next);
+      const shopping=clone(backup.shopping[w.week]||{});shopping.checked={};state.docs['shopping/'+w.week]=shopping;await persist('shopping/'+w.week,shopping);
+    }
   }
-  state.docs['planner/latest']=backup;await persist('planner/latest',backup);
-  for(const w of chosen) {
-    const previous=backup.plans[w.week];const next=clone(w);
-    next.days.forEach((d,i)=>{d.montaza=!!previous?.days?.[i]?.montaza;});
-    state.docs['plans/'+w.week]=next;await persist('plans/'+w.week,next);
-    const shopping=clone(backup.shopping[w.week]||{});shopping.checked={};state.docs['shopping/'+w.week]=shopping;await persist('shopping/'+w.week,shopping);
-  }
-  state.weekStart=CURATED_MENU.start;state.shopMode='week';state.recipe=null;state.view='plan';state.modal=null;location.hash='plan';render();toast('Jelovnik je postavljen. Prethodni plan možeš vratiti.');
+  state.weekStart=candidates[index].week;state.shopMode='week';LS.set('zns:shopMode','week');state.recipe=null;state.view='plan';state.modal=null;state.curatedEditor=null;location.hash='plan';render();toast(changed.length?'Jelovnik je spremljen. Kupovina je ažurirana.':'Ovaj jelovnik je već spremljen.');
 }
 async function restorePreparedMenu() {
   const backup=state.docs['planner/latest'];if(!backup?.plans)return;

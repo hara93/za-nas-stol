@@ -29,7 +29,7 @@ node --test tests/*.test.cjs
 - `data/beef-recipe-sources.json`: izvori šest jela s ramstekom, biftekom i junećom plećkom, profili komada mesa i upute za pečenje.
 - `sw.js`: offline aplikacija i predmemorija pregledanih slika.
 
-Postojeći ključevi `zns:` u localStorage ostaju isti. Favoriti i postavke pakiranja dio su `settings/main` i uključeni su u izvoz/uvoz. Izbor teme čuva se na uređaju. Sama nadogradnja ne mijenja spremljeni plan, dnevnik, imena ili omjere porcija. Gumb za postavljanje pripremljenog jelovnika mijenja samo odabrane datume i sprema prethodne planove i tjedne popise u `planner/latest` za povrat. Ponovno postavljanje već jednakog jelovnika čuva tu kopiju.
+Postojeći ključevi `zns:` u localStorage ostaju isti. Favoriti i postavke pakiranja dio su `settings/main` i uključeni su u izvoz/uvoz. Izbor teme čuva se na uređaju. Sama nadogradnja ne mijenja spremljeni plan, dnevnik, imena ili omjere porcija. „Pogledaj jelovnik” otvara kartice dana s fotografijama, odabirom tjedna i zamjenom obroka. Za već postavljen jelovnik uređivač učitava spremljene planove, uključujući ručne izmjene. Zamjene ostaju radna kopija do pritiska na Spremi. Spremiti se može trenutno odabrani tjedan ili sva četiri; samo izmijenjeni tjedni i njihovi popisi spremaju se u `planner/latest` za povrat. Ponovno spremanje jednakog jelovnika čuva tu kopiju.
 
 ## Tjedna i velika kupovina
 
@@ -41,4 +41,4 @@ Popisi pokrivaju planirane doručke, ručkove i večere za postojeće obiteljske
 
 Fotografije su AI ilustracije načina posluživanja, a ne dokumentacija skuhanih jela. Novi recepti imaju poveznice na izvorne objavljene recepte i opisuju obiteljske prilagodbe; prilagodbe nisu zasebno kuhinjski testirane. Nutritivne vrijednosti su procjene prema sirovim/suhim namirnicama. Nedostajući podaci u USDA bazi ostaju označeni kao `null`; zbrojevi mogu biti nepotpuni.
 
-Pri promjeni aplikacije promijeni `VERSION` u `sw.js` kako bi nova predmemorija preuzela aktualni HTML/CSS. Slike se spremaju nakon prvog učitavanja; nedostupna slika ima lokalnu SVG zamjenu.
+Prije objave pokreni `python3 scripts/version_assets.py`, zatim `node --test tests/*.test.cjs`. Skripta dodaje hash sadržaja u URL svakog vanjskog CSS/JS resursa te usklađuje offline popis i verziju u `sw.js`. Tako i stari aktivni service worker pri prvom otvaranju novog HTML-a dohvaća pripadajuće nove stilove i skripte. Testovi provjeravaju usklađenost URL-ova s datotekama. Slike se spremaju nakon prvog učitavanja; nedostupna slika ima lokalnu SVG zamjenu.

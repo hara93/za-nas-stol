@@ -42,3 +42,18 @@ test('an app update preserves unrelated caches and the reusable font cache',asyn
   sw.store('another-app');sw.store('zns-old');sw.store('zns-fonts');
   await sw.activate();assert.ok(sw.stores.has('another-app'));assert.ok(sw.stores.has('zns-fonts'));assert.ok(!sw.stores.has('zns-old'));
 });
+test('the new HTML requests content-versioned assets present in the offline shell',()=>{
+  const {createHash}=require('node:crypto'),base=path.join(__dirname,'..');
+  const html=fs.readFileSync(path.join(base,'index.html'),'utf8'),sw=fs.readFileSync(path.join(base,'sw.js'),'utf8');
+  for(const asset of ['experience.css','shopping-data.js','shopping.js']) {
+    const hash=createHash('sha256').update(fs.readFileSync(path.join(base,asset))).digest('hex').slice(0,12);
+    assert.ok(html.includes(`${asset}?v=${hash}`),`${asset}: HTML must bypass the old worker cache`);
+    assert.ok(sw.includes(`./${asset}?v=${hash}`),`${asset}: available offline`);
+  }
+});
+test('a cache-first worker does not reuse unversioned CSS for a new version URL',async()=>{
+  const sw=worker(async req=>new Response(req.url.includes('?v=')?'new styles':'old styles'));
+  const url='https://example.com/za-nas-stol/experience.css';
+  assert.equal(await (await sw.request(url)).text(),'old styles');
+  assert.equal(await (await sw.request(url+'?v=new')).text(),'new styles');
+});

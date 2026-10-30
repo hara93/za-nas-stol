@@ -625,7 +625,7 @@ body.cooking .toast{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 76px);ma
 @media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 </style>
 
-<link rel="stylesheet" href="experience.css">
+<link rel="stylesheet" href="experience.css?v=7c1cee450739">
 </head>
 <body>
 <a class="skip-link" href="#view">Preskoči na sadržaj</a>
@@ -662,8 +662,8 @@ const WEB_BUILD = true;
 const SEED_DOCS = {"plans/2026-10-26":{"week":"2026-10-26","days":[{"b":"D02","l":"R02","v":"V08","montaza":false},{"b":"D10","l":"R01","v":"V09","montaza":false},{"b":"D09","l":"R10","v":"V04","montaza":false},{"b":"D08","l":"R09","v":"V01","montaza":false},{"b":"D04","l":"R07","v":"V07","montaza":false},{"b":"D03","l":"R04","v":"V02","montaza":false},{"b":"D07","l":"R06","v":"V10","montaza":false}]},"plans/2026-11-02":{"week":"2026-11-02","days":[{"b":"D06","l":"R05","v":"V05","montaza":false},{"b":"D09","l":"R01","v":"V04","montaza":false},{"b":"D01","l":"R08","v":"V06","montaza":false},{"b":"D07","l":"R07","v":"V09","montaza":false},{"b":"D10","l":"R10","v":"V07","montaza":false},{"b":"D04","l":"R09","v":"V08","montaza":false},{"b":"D08","l":"R06","v":"V01","montaza":false}]}};
 
 </script>
-<script src="shopping-data.js"></script>
-<script src="shopping.js"></script>
+<script src="shopping-data.js?v=68ac99a6ce87"></script>
+<script src="shopping.js?v=154cc1f553d9"></script>
 <script>
 'use strict';
 /* ===================== Ilustracije jela =====================
@@ -1863,6 +1863,7 @@ function modalBody(m) {
   const close = `<button class="icon-btn" data-action="close-modal" aria-label="Zatvori">${ic('x')}</button>`;
   if (m.type === 'shopping-item') return shoppingItemModal(m, close);
   if (m.type === 'curated-menu') return curatedMenuModal(close);
+  if (m.type === 'curated-pick') return curatedPickModal(m);
   if (m.type === 'pick') {
     const meal = SLOTS.find(([k]) => k === m.slot)[1]; const q = searchText(state.rsearch); const cur = getPlan(m.ws).days[m.di][m.slot];
     const list = RECIPES.filter(r => r.meal === meal && (!q || searchText(r.title).includes(q) || searchText(PROT[r.protein]).includes(q)));
@@ -1902,7 +1903,7 @@ function modalBody(m) {
 function renderModal() {
   const rootEl = document.getElementById('modal-root'); const m = state.modal;
   if (!m) { if (rootEl.firstChild) ghostOut(rootEl); modalSig = ''; document.body.classList.remove('sheet-open'); syncDialogFocus(); return; }
-  const html = `<div class="sheet-bg" data-action="close-modal-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(m.type === 'pick' ? 'Odaberi obrok' : m.type === 'addplan' ? 'Dodaj u plan' : m.type === 'portion' ? 'Prilagodi porciju' : m.title || 'Uvezi podatke')}"><div class="grab" data-drag="1"></div>${modalBody(m)}</div></div>`;
+  const html = `<div class="sheet-bg" data-action="close-modal-bg"><div class="sheet ${m.type.startsWith('curated-') ? 'menu-sheet' : ''}" role="dialog" aria-modal="true" aria-label="${esc(m.type === 'pick' ? 'Odaberi obrok' : m.type === 'addplan' ? 'Dodaj u plan' : m.type === 'portion' ? 'Prilagodi porciju' : m.title || 'Uvezi podatke')}"><div class="grab" data-drag="1"></div>${modalBody(m)}</div></div>`;
   const sig = m.type + '|' + (m.type === 'pick' ? `${m.ws}|${m.di}|${m.slot}` : (m.type === 'portion' ? `${m.id}|${m.p}` : (m.id || m.title || '')));
   if (sig === modalSig && rootEl.firstChild) patch(rootEl, html);
   else { if (rootEl.firstChild) rootEl.innerHTML = ''; rootEl.innerHTML = html; }
@@ -2122,7 +2123,11 @@ const ACTIONS = {
   'purchase-week'(t) { state.shopMode = 'week'; state.weekStart = t.dataset.ws; LS.set('zns:shopMode', 'week'); render(); scrollTop(); },
   'purchase-check'(t) { togglePurchase(t.dataset.id, t.dataset.mode, t.dataset.start); },
   'purchase-edit'(t) { state.modal = { type:'shopping-item', title:'Pakiranje i zaliha', id:t.dataset.id, iid:t.dataset.id, mode:t.dataset.mode, start:t.dataset.start }; renderModal(); },
-  'curated-preview'() { state.modal = { type:'curated-menu', title:'Pripremljeni jelovnik' }; renderModal(); },
+  'curated-preview'() { openCuratedEditor(); },
+  'curated-week'(t) { changeCuratedWeek(+t.dataset.index); },
+  'curated-pick'(t) { state.rsearch='';state.modal={type:'curated-pick',title:'Zamijeni obrok',di:+t.dataset.di,slot:t.dataset.slot};renderModal(); },
+  'curated-back'() { showCuratedEditor(); },
+  'curated-select'(t) { if(selectCuratedMeal(t.dataset.id))showCuratedEditor(); },
   async 'apply-curated'(t) { if(state.applyingMenu)return; state.applyingMenu=true; try { await applyCuratedMenu(+t.dataset.count); } finally { state.applyingMenu=false; } },
   'restore-curated'() { confirmModal('Vratiti prethodni jelovnik?', 'Zamjenjuje planove za datume posljednjeg postavljanja pripremljenog jelovnika. Novije izmjene tih tjedana bit će zamijenjene spremljenom kopijom.', 'Vrati prethodni plan', () => restorePreparedMenu()); },
   'copy-prompt'(t) { copyText(RB[t.dataset.id].img); },
@@ -2149,6 +2154,7 @@ const ACTIONS = {
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-action]'); if (!t) return; if (t.tagName === 'INPUT' || t.tagName === 'FORM') return;
   if (t.closest('#sheet-ghost')) return;
+  if (t.dataset.action === 'close-modal-bg' && e.target !== t) return;
   const fn = ACTIONS[t.dataset.action]; if (fn) { e.preventDefault(); fn(t, e); }
 });
 document.addEventListener('error', e => { const img = e.target; if (img.tagName === 'IMG' && img.dataset.recipeImage && !img.getAttribute('src').startsWith('data:')) img.src = FoodArt.uri(img.dataset.recipeImage, mealOf(img.dataset.recipeImage)); }, true);
@@ -2176,6 +2182,7 @@ document.addEventListener('pointerup', e => {
 });
 document.addEventListener('change', async e => {
   const t = e.target;
+  if (t.type === 'checkbox' && t.dataset.action === 'purchase-check') { togglePurchase(t.dataset.id,t.dataset.mode,t.dataset.start); return; }
   if (t.type === 'checkbox' && t.name && t.name.startsWith('td-')) { const lab = t.closest('label'); if (lab) lab.classList.toggle('on', t.checked); return; }
   if (t.classList && t.classList.contains('ex-g')) { const g = parseFloat(String(t.value).replace(',', '.')); editPortion((next, p) => { if (g > 0) next.extras[p][t.dataset.iid] = g; else delete next.extras[p][t.dataset.iid]; }); return; }
   if (t.id === 'import-file' && t.files && t.files[0]) { try { importData(await t.files[0].text()); } catch (err) { toast('Datoteku nije moguće pročitati.', 'info'); } return; }
