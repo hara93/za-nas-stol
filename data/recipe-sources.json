@@ -1,0 +1,86 @@
+{
+  "verifiedOn": "2026-10-30",
+  "provenance": "Read each primary recipe publisher source. Recipes are original Croatian adaptations and have not been independently cooked/tested by us. Do not label the adaptations as triple-tested or inherit publisher ratings.",
+  "recipeSources": [
+    {
+      "id": "R11",
+      "title": "Love and Lemons · Quinoa Salad",
+      "url": "https://www.loveandlemons.com/quinoa-salad-recipe/",
+      "note": "Prilagodba objavljenog recepta: svježa rajčica, kuhani slanutak i jednostavan limunov preljev; količine za obitelj. Ova prilagodba nije zasebno kuhinjski testirana."
+    },
+    {
+      "id": "R12",
+      "title": "Good Food · Griddled chicken with quinoa Greek salad",
+      "url": "https://www.bbcgoodfood.com/recipes/griddled-chicken-quinoa-greek-salad",
+      "note": "Obiteljska prilagodba izvornog recepta, s maslinovim uljem umjesto maslaca i bez čilija u osnovi. Nije zasebno kuhinjski testirana."
+    },
+    {
+      "id": "R13",
+      "title": "Good Food · Mushroom buckwheat risotto",
+      "url": "https://www.bbcgoodfood.com/recipes/mushroom-buckwheat-risotto",
+      "note": "Inspirirano heljdinim rižotom: bez vina i cikle, uz bijeli grah, špinat i parmezan. To je naša prilagodba, ne izvorni testirani omjer."
+    },
+    {
+      "id": "V11",
+      "title": "Good Food · Buckwheat with charred baby aubergines",
+      "url": "https://www.bbcgoodfood.com/recipes/buckwheat-charred-baby-aubergines",
+      "note": "Prilagodba s običnim pečenim patlidžanom, suhom lećom i fetom; bez suhih višanja. Nije zasebno kuhinjski testirana."
+    },
+    {
+      "id": "V12",
+      "title": "UCLA Health · Broccoli & Tofu Stir Fry with Peanut Sauce",
+      "url": "https://www.uclahealth.org/simms-mann-center/recipes/broccoli-tofu-stir-fry-with-peanut-sauce",
+      "note": "Prilagodba objavljenog recepta: kvinoja umjesto riže, limun i med u blažem umaku, bez cijelih kikirikija. Nije zasebno kuhinjski testirana."
+    },
+    {
+      "id": "V13",
+      "title": "Love and Lemons · Tofu Scramble",
+      "url": "https://www.loveandlemons.com/tofu-scramble/",
+      "note": "Prilagodba s paprikom, špinatom i tostom; voda umjesto biljnog mlijeka, bez prehrambenog kvasca. Nije zasebno kuhinjski testirana."
+    }
+  ],
+  "nutrition": {
+    "source": "USDA National Nutrient Database for Standard Reference, Release 28 (2015), as hosted by USDA ARS",
+    "landingPage": "https://www.ars.usda.gov/northeast-area/beltsville-md-bhnrc/beltsville-human-nutrition-research-center/methods-and-application-of-food-composition-laboratory/mafcl-site-pages/sr11-sr28/",
+    "download": "https://www.ars.usda.gov/ARSUserFiles/80400535/DATA/SR/sr28/dnload/sr28asc.zip",
+    "method": "Read FOOD_DES.txt and NUT_DATA.txt directly from official ZIP. Values per 100g edible portion. Quinoa and buckwheat are dry weights, tofu raw firm calcium-set, soy sauce low-sodium shoyu. Nutrient keys use code mapping below. Missing values retained as null and listed in missingNutrients; not imputed as zero.",
+    "nutrientCodes": {
+      "kcal": "208",
+      "p": "203",
+      "f": "204",
+      "c": "205",
+      "fib": "291",
+      "sug": "269",
+      "sat": "606",
+      "epa": "629",
+      "dha": "621",
+      "fe": "303",
+      "ca": "301",
+      "mg": "304",
+      "k": "306",
+      "zn": "309",
+      "vd": "328",
+      "b12": "418",
+      "fol": "417",
+      "vc": "401",
+      "na": "307"
+    },
+    "caveats": [
+      "Tofu calcium strongly depends on coagulant; the supplied ingredient explicitly names calcium sulfate. Do not apply the 683mg/100g calcium value to all tofu products.",
+      "SR28 raw quinoa record 20035 reports DHA=0.047g/100g; retained the published number despite being unusual.",
+      "Original app coerces absent n values to zero in sums. Render nutritionNote (or equivalent warning) so partial totals are not mistaken for complete measurements."
+    ]
+  },
+  "foodSafety": {
+    "chickenTemperature": "74 °C measured with thermometer",
+    "source": "https://ask.fsis.usda.gov/article/What-is-a-safe-internal-temperature-for-cooking-meat-and-poultry"
+  },
+  "validation": [
+    "Six unique IDs: R11-R13,V11-V13, no collision with original 30 recipes.",
+    "All batch ingredient references resolve; all group indexes are valid and amounts positive.",
+    "Every ingredient amount is whole-family raw/dry/edible weight, using existing 55:33:12 allocation. No per-person extras or exclusions.",
+    "All six include primary source title,url,note and ingredient-accurate image prompt.",
+    "All six recipe bodies were independently worded; no verbatim publisher passages; derived recipe wording per publisher page is under 200 words.",
+    "New ingredients parsed from official USDA data, all required n keys present; missing source values explicitly null."
+  ]
+}
