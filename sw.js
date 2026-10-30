@@ -1,7 +1,7 @@
 /* Service worker samostalne verzije: aplikacija radi i bez interneta.
    Stranica se uvijek prvo traži s mreže (nova verzija stiže čim je objavljena), a predmemorija je rezerva.
    build_web.py upisuje oznaku verzije, pa se svaki novi build instalira kao nova verzija. */
-const VERSION = 'zns-b10a111ba433';
+const VERSION = 'zns-51a5befedcc3';
 const FONTS = 'zns-fonts';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
