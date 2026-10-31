@@ -1,9 +1,9 @@
 /* Recipe spice notes are not weighed ingredients. Pack sizes below are shopping suggestions. */
 const SPICES = [
-  {id:'papar',name:'Crni papar',match:'papar',pack:'1 pakiranje · 40–50 g',use:'Svježe samelji uz steak, jaja, gljive i povrće.'},
+  {id:'papar',name:'Crni papar',match:'\\bpap(?:ar|ra|rom|ru)\\b',pack:'1 pakiranje · 40–50 g',use:'Svježe samelji uz steak, jaja, gljive i povrće.'},
   {id:'sol',name:'Sol',match:'\\bsol(?:i)?\\b',pack:'1 pakiranje · 500 g',use:'Dosoli po ukusu na tanjuru, kako je navedeno u vašim receptima.'},
   {id:'origano',name:'Origano, sušeni',match:'origan',pack:'1 vrećica / staklenka · 10–15 g',use:'Piletina, kvinoja, pizza i umaci od rajčice.'},
-  {id:'dimljena',name:'Dimljena slatka paprika',match:'dimljen[a-z]* paprik',pack:'1 pakiranje · 30–50 g',use:'Tofu, pureći burgeri, slanutak i pečeni krumpir. Biraj slatku ako ne želiš ljuto.'},
+  {id:'dimljena',name:'Dimljena slatka paprika',match:'dimljen[a-z]*(?: slatk[a-z]*)? paprik[a-z]*',pack:'1 pakiranje · 30–50 g',use:'Tofu, pureći burgeri, slanutak i pečeni krumpir. Biraj slatku ako ne želiš ljuto.'},
   {id:'slatka',name:'Slatka mljevena paprika',match:'slatk[a-z]*(?: mljeven[a-z]*)? paprik',pack:'1 pakiranje · 50–100 g',use:'Paprikaš, gulaš i punjene paprike. Umiješaj uz smanjenu vatru i dodaj tekućinu da ne zagori.'},
   {id:'kumin',name:'Kumin, mljeveni',match:'kumin',pack:'1 pakiranje · 20–30 g',use:'Shakshuka, slanutak, leća i tofu. Kumin i kim nisu isti začin.'},
   {id:'kurkuma',name:'Kurkuma',match:'kurkum',pack:'1 pakiranje · 20–30 g',use:'Za tofu kajganu kreni s ¼ žličice, kao u receptu.'},
@@ -14,12 +14,12 @@ const SPICES = [
   {id:'mazuran',name:'Mažuran',match:'mazuran',pack:'1 pakiranje · 10–15 g',use:'Juneći paprikaš i gulaš s heljdom.'},
   {id:'muskat',name:'Muškatni oraščić',match:'muskat',pack:'1 malo pakiranje · 10–15 g',use:'Prstohvat za pire, špinat, musaku i umak sa sirom.'},
   {id:'cimet',name:'Cimet, mljeveni',match:'cimet',pack:'1 pakiranje · 30–40 g',use:'Zobena kaša, palačinke, jogurt i kruška; malo i u musaku.'},
-  {id:'cesnjak_prah',name:'Češnjak u prahu / granulama',match:'cesnjak u prahu',pack:'1 pakiranje · 40–50 g',use:'Pizza, pečeno povrće i suhe mješavine. Svježi češnjak već je na redovnom popisu.'},
+  {id:'cesnjak_prah',name:'Češnjak u prahu / granulama',match:'cesnjak[a-z]* u prahu',pack:'1 pakiranje · 40–50 g',use:'Pizza, pečeno povrće i suhe mješavine. Svježi češnjak već je na redovnom popisu.'},
   {id:'persin',name:'Peršin',match:'persin',fresh:true,pack:'1 vezica ili malo pakiranje smrznutog',use:'Dodaj pri kraju u ribu, salate, heljdu i variva.'},
   {id:'kopar',name:'Kopar',match:'kopar|kopr',fresh:true,pack:'1 malo pakiranje svježeg ili smrznutog',use:'Losos, jogurt-umak, krastavac i heljda s fetom.'},
   {id:'bosiljak',name:'Bosiljak',match:'bosilj',fresh:true,pack:'1 vezica / teglica ili smrznuti',use:'Rajčica, pizza, tjestenina i tagliata. Dodaj pred posluživanje.'},
-  {id:'menta',name:'Menta / metvica',match:'menta|metvic',fresh:true,pack:'1 vezica ili malo pakiranje smrznute',use:'Grčka salata s kvinojom, bulgur i jogurtni preljevi.'},
-  {id:'vlasac',name:'Vlasac',match:'vlasac',fresh:true,pack:'1 vezica ili malo pakiranje smrznutog',use:'Jaja, svježi sir, krumpir i jogurtni umaci.'},
+  {id:'menta',name:'Menta / metvica',match:'\\bment(?:a|e|u|om)\\b|metvic',fresh:true,pack:'1 vezica ili malo pakiranje smrznute',use:'Grčka salata s kvinojom, bulgur i jogurtni preljevi.'},
+  {id:'vlasac',name:'Vlasac',match:'vlas(?:ac|c[a-z]*)',fresh:true,pack:'1 vezica ili malo pakiranje smrznutog',use:'Jaja, svježi sir, krumpir i jogurtni umaci.'},
   {id:'cili',name:'Čili pahuljice',match:'cili',optional:true,pack:'1 malo pakiranje · 20–30 g',use:'Za ljutinu u tjestenini, tofuu i varivima; dodaj na tanjur po želji.'},
   {id:'vanilija',name:'Vanilija',match:'vanilij',optional:true,pack:'1 malo pakiranje mljevene vanilije',use:'Kaša, jogurt i palačinke. Provjeri kupuješ li čistu vaniliju ili zaslađenu mješavinu.'},
   {id:'sumak',name:'Sumak',match:'sumak',optional:true,pack:'1 malo pakiranje · 30–50 g',use:'Kiselkasti dodatak luku, salatama i kvinoji; kreni s prstohvatom.'},
@@ -28,7 +28,7 @@ const SPICES = [
   {id:'ocat',name:'Vinski ili jabučni ocat',optional:true,pack:'1 boca · 250 ml',use:'Nekoliko kapi u salatu ili gotovo varivo ako mu nedostaje svježine. Limun je već u popisu namirnica.'}
 ];
 const SPICE_COMBINATIONS = [
-  ['Ramstek i biftek','Papar + ružmarin ili timijan. Češnjak je već u receptima; za dobar steak ne treba mnogo različitih začina.'],
+  ['Ramstek i biftek','Papar + ružmarin ili timijan. Dobro posuši meso, zapeci i odmori prije rezanja; ne treba mnogo različitih začina.'],
   ['Tofu kajgana','Kurkuma + kumin + dimljena paprika. Kreni s količinama iz recepta, pa prilagodi okus.'],
   ['Kvinoja i slanutak','Origano + peršin + limun. Za toplu, začinjenu verziju probaj kumin i dimljenu papriku.'],
   ['Heljda i gljive','Timijan + papar + peršin. Gljive dobro zapeci, pa začini.'],
@@ -40,7 +40,7 @@ function spiceNeeds(start,mode='week') {
   for(const ws of mode==='month'?shoppingWeeks(start):[start])for(const day of getPlan(ws).days)for(const [slot] of SLOTS) {
     const r=RB[day[slot]];if(!r)continue;
     const notes=searchText(r.spices||'');
-    for(const s of SPICES)if(s.match&&new RegExp(s.match).test(notes)) {
+    for(const s of SPICES)if(s.match&&new RegExp(s.match).test(s.id==='slatka'?notes.replace(/dimljen[a-z]*(?: slatk[a-z]*)? paprik[a-z]*/g,''):notes)) {
       needs[s.id]??={count:0,recipes:[]};needs[s.id].count++;if(!needs[s.id].recipes.includes(r.id))needs[s.id].recipes.push(r.id);
     }
   }

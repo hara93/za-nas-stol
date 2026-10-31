@@ -7,8 +7,8 @@ function worker(fetcher) {
   const events={}, stores=new Map();
   const store=name=>{if(!stores.has(name))stores.set(name,new Map());const m=stores.get(name);return {match:async req=>m.get(req.url||req),put:async(req,res)=>m.set(req.url||req,res),addAll:async()=>{}};};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8'),{
-    self:{location:{origin:'https://example.com'},addEventListener:(name,fn)=>events[name]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},
-    URL,fetch:fetcher,caches:{open:async name=>store(name),keys:async()=>[...stores.keys()],delete:async name=>stores.delete(name),match:async req=>{for(const m of stores.values())if(m.has(req.url||req))return m.get(req.url||req);}}
+    self:{location:{origin:'https://example.com',href:'https://example.com/za-nas-stol/sw.js'},addEventListener:(name,fn)=>events[name]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},
+    URL,Response,fetch:fetcher,caches:{open:async name=>store(name),keys:async()=>[...stores.keys()],delete:async name=>stores.delete(name),match:async req=>{for(const m of stores.values())if(m.has(req.url||req))return m.get(req.url||req);}}
   });
   return {
     stores, store,
@@ -56,4 +56,12 @@ test('a cache-first worker does not reuse unversioned CSS for a new version URL'
   const url='https://example.com/za-nas-stol/experience.css';
   assert.equal(await (await sw.request(url)).text(),'old styles');
   assert.equal(await (await sw.request(url+'?v=new')).text(),'new styles');
+});
+test('reading the recipe report never overwrites the offline app shell',async()=>{
+  let offline=false;
+  const sw=worker(async req=>{if(offline)throw new Error('offline');return new Response(req.url.includes('pregled-recepata.html')?'report':'app');});
+  const base='https://example.com/za-nas-stol/';
+  await sw.request(base,'navigate');await sw.request(base+'pregled-recepata.html','navigate');offline=true;
+  assert.equal(await (await sw.request(base,'navigate')).clone().text(),'app');
+  assert.equal(await (await sw.request(base+'pregled-recepata.html','navigate')).clone().text(),'report');
 });

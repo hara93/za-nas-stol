@@ -17,10 +17,10 @@ for name in assets:
         raise SystemExit(f'Expected one HTML reference for {name}, found {count}')
     urls.append('./' + url)
 html_path.write_text(html)
-core = ['./', './index.html', *urls, './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png']
+core = ['./', './index.html', './pregled-recepata.html', *urls, './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png']
 worker_path = root / 'sw.js'
 worker = re.sub(r'const CORE = .*?;', 'const CORE = ' + json.dumps(core) + ';', worker_path.read_text())
-digest = hashlib.sha256(html.encode() + (root / 'manifest.webmanifest').read_bytes() + re.sub(r"const VERSION = '[^']+';", '', worker).encode()).hexdigest()[:12]
+digest = hashlib.sha256(html.encode() + (root / 'pregled-recepata.html').read_bytes() + (root / 'manifest.webmanifest').read_bytes() + re.sub(r"const VERSION = '[^']+';", '', worker).encode()).hexdigest()[:12]
 worker = re.sub(r"const VERSION = '[^']+';", f"const VERSION = 'zns-{digest}';", worker)
 worker_path.write_text(worker)
 print('Versioned assets and offline cache:', digest)

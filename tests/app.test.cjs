@@ -277,8 +277,11 @@ test('dialog backdrop does not swallow native controls inside the dialog', () =>
 test('spice needs follow the selected recipes, distinguish paprika types and merge four actual weeks', () => {
   const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'v','V13')");
   let needs=run("spiceNeeds('2026-11-02')");
-  for(const id of ['kurkuma','kumin','dimljena','papar','sol'])assert.equal(needs[id].count,1);
+  for(const id of ['kurkuma','kumin','dimljena','papar'])assert.equal(needs[id].count,1);
+  assert.equal(needs.sol,undefined,'salt is optional, not a requirement of the tofu recipe');
   assert.equal(needs.slatka,undefined);assert.equal(needs.menta,undefined);
+  run("setSlot('2026-11-02',1,'l','R12');setSlot('2026-11-02',2,'b','D04');setSlot('2026-11-02',3,'v','V05')");
+  for(const id of ['menta','vlasac','cesnjak_prah'])assert.ok(run(`spiceNeeds('2026-11-02')['${id}']`),`${id}: Croatian inflection`);
   run("setSlot('2026-11-02',0,'v','V15')");needs=run("spiceNeeds('2026-11-02')");
   assert.ok(needs.djumbir);assert.equal(needs.kurkuma,undefined);
   run("CURATED_MENU.weeks.forEach(w=>state.docs['plans/'+w.week]=w)");
@@ -307,4 +310,39 @@ test('shopping exports include spices once for the pantry and herbs per actual w
   assert.ok(!text.includes('Međuobroci i začini po ukusu nisu uključeni'));
   assert.ok(run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Kurkuma'));
   assert.ok(!run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Čili pahuljice'));
+});
+test('the full recipe review covers every dish and snack and exposes practical advice',()=>{
+  const run=app(),review=JSON.parse(fs.readFileSync(path.join(base,'data/recipe-review.json'),'utf8'));
+  const all=run('[...RECIPES,...SNACKS]'),report=fs.readFileSync(path.join(base,'pregled-recepata.html'),'utf8');
+  assert.equal(review.recipes.length,all.length);
+  for(const r of all){
+    assert.ok(r.review.flavor&&r.review.balance,r.id);
+    assert.equal(review.recipes.filter(x=>x.id===r.id).length,1,r.id);
+    assert.ok(report.includes(`id="${r.id}"`),r.id);
+    if(r.steps){
+      assert.ok(run(`viewRecipeDetail(RB['${r.id}'])`).includes(r.review.flavor));
+      assert.ok(!r.steps.some(s=>/\d+\s*\/\s*\d+\s*\/\s*\d+/.test(s)),`${r.id}: no fixed serving ratios`);
+    }
+  }
+});
+test('changed quantities feed both shopping and portions, with child exclusions applied before totals',()=>{
+  const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'l','R10');setSlot('2026-11-02',1,'l','R11')");
+  assert.equal(run("weekShopping('2026-11-02').feta"),130);
+  assert.equal(run("wholeOf(RB.R02).cesnjak"),6);
+  assert.equal(run("wholeOf(RB.R07).limun"),15);
+  assert.equal(run("wholeOf(RB.V11).ulje"),20);
+  assert.equal(run("gramsFor(RB.V07,'K').kapari"),undefined);
+  assert.equal(run("gramsFor(RB.V07,'K').masline"),undefined);
+  assert.ok(Math.abs(run("wholeOf(RB.V07).kapari")-17.6)<1e-8);
+});
+test('label corrections propagate into cached snack nutrition and do not fabricate missing micronutrients',()=>{
+  const run=app();
+  assert.equal(run('ING.posni_sir.n.na'),96);
+  assert.equal(run('ING.posni_sir.n.ca'),null);
+  assert.equal(run('ING.mlijeko2.n.vd'),null);
+  assert.equal(run('ING.mlijeko3.n.vd'),null);
+  for(const sn of run('SNACKS'))for(const p of ['T','S']){
+    const calculated=run(`nutOf(SB['${sn.id}'].per['${p}'])`);
+    for(const [key,value] of Object.entries(calculated))assert.ok(Math.abs(value-sn.nut[p][key])<0.001,`${sn.id}/${p}/${key}`);
+  }
 });
