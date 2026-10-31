@@ -1,0 +1,17 @@
+{
+  "checkedOn": "2026-10-31",
+  "recipeRequirements": "Derived at runtime from the existing recipe spices field. Optional chilli, vanilla and sumac remain optional. Quantified garlic, lemon, mustard and soy sauce are already in the ordinary grocery calculation and are not duplicated.",
+  "packSizes": "Illustrative small retail packs for checking and replenishing a pantry, not a calculated requirement or a claim about retailer availability. Fresh herbs are checked by week; dry pantry marks are shared across periods until manually cleared.",
+  "sources": [
+    {
+      "title": "University of Delaware Cooperative Extension: Herbs & Spices – What Goes With What Food",
+      "url": "https://www.udel.edu/academics/colleges/canr/cooperative-extension/fact-sheets/herbs-spices-on-food/",
+      "use": "General culinary pairing inspiration; app combinations are household suggestions, not verbatim recipes."
+    },
+    {
+      "title": "BBC Good Food: Tofu scramble",
+      "url": "https://www.bbcgoodfoodme.com/recipes/tofu-scramble-0/",
+      "use": "Turmeric, cumin and sweet smoked paprika as a tofu combination; consistent with the app's existing V13 recipe."
+    }
+  ]
+}

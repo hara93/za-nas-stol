@@ -45,7 +45,7 @@ test('an app update preserves unrelated caches and the reusable font cache',asyn
 test('the new HTML requests content-versioned assets present in the offline shell',()=>{
   const {createHash}=require('node:crypto'),base=path.join(__dirname,'..');
   const html=fs.readFileSync(path.join(base,'index.html'),'utf8'),sw=fs.readFileSync(path.join(base,'sw.js'),'utf8');
-  for(const asset of ['experience.css','shopping-data.js','shopping.js']) {
+  for(const asset of ['experience.css','shopping-data.js','shopping.js','spices.js']) {
     const hash=createHash('sha256').update(fs.readFileSync(path.join(base,asset))).digest('hex').slice(0,12);
     assert.ok(html.includes(`${asset}?v=${hash}`),`${asset}: HTML must bypass the old worker cache`);
     assert.ok(sw.includes(`./${asset}?v=${hash}`),`${asset}: available offline`);

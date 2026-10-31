@@ -1,7 +1,7 @@
 // Network-first app shell; visited meal photos remain available offline.
-const VERSION = 'zns-b73939ac9a4e';
+const VERSION = 'zns-58ff93f2d790';
 const FONTS = 'zns-fonts';
-const CORE = ["./", "./index.html", "./experience.css?v=7c1cee450739", "./shopping-data.js?v=68ac99a6ce87", "./shopping.js?v=154cc1f553d9", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
+const CORE = ["./", "./index.html", "./experience.css?v=1b4b49279b6c", "./shopping-data.js?v=68ac99a6ce87", "./shopping.js?v=f32bb0beb1e7", "./spices.js?v=215fa432d85a", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
 });

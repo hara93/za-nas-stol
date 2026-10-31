@@ -20,6 +20,7 @@ node --test tests/*.test.cjs
 
 - `index.html`: izvorna baza namirnica i recepata te logika aplikacije.
 - `experience.css`: vizualni izgled i prilagodbe mobitelu/računalu.
+- `spices.js`: popis začina prema receptima, trajne oznake za suhu ostavu, tjedne oznake za svježe bilje i prijedlozi kombinacija.
 - `shopping.js`: kupovina prema pakiranjima, početna zaliha, četverotjedni pregled i postavljanje pripremljenog jelovnika.
 - `shopping-data.js`: primjeri pakiranja i ugrađeni jelovnik; ažurirati zajedno s izvornim podacima u `data/`.
 - `data/four-week-menu.json`: 84 obroka za 2.–29. studenoga 2026.
@@ -37,7 +38,7 @@ Velika kupovina obuhvaća četiri stvarna plana od odabranog ponedjeljka. Za ost
 
 Početna zaliha čuva se u `shopping/YYYY-MM-DD.stock`, zajednički za tjedni i četverotjedni pregled s istim početnim datumom. Oduzima se jednom. Kvačice u `shopping/` i `shopping-month/` označavaju kupnju, ali ne mijenjaju zalihu. Prikazani ostatak je projekcija, a za novo razdoblje unosi se stvarna dostupna zaliha. Promjena potrebnih količina poništava valjanost starih kvačica. Svi ovi podaci i kopija plana uključeni su u izvoz/uvoz.
 
-Popisi pokrivaju planirane doručke, ručkove i večere za postojeće obiteljske porcije; međuobroci i začini po ukusu nisu uključeni. Konzerve koriste ocijeđenu masu, a jaja se prikazuju u komadima. Ulje i soja umak u receptima koriste grame pa se mililitri s boce ne pretvaraju automatski u grame. Pakiranja su promjenjivi primjeri, ne tvrdnje o dostupnosti kod trgovaca.
+Popisi pokrivaju planirane doručke, ručkove i večere za postojeće obiteljske porcije; međuobroci nisu uključeni. Začini su zaseban popis izveden iz polja `spices` u odabranim receptima. Njihova pakiranja su prijedlozi dopune, ne izračun potrošnje. Oznake „Imam” za suhu ostavu čuvaju se u `settings/main.spicePantry`, a za svježe bilje u `shopping/YYYY-MM-DD.herbs`; oba su uključena u izvoz/uvoz. Kopiranje i preuzimanje kupovine uključuje i začine, uz jasno odvojene neobavezne dodatke. Konzerve koriste ocijeđenu masu, a jaja se prikazuju u komadima. Ulje i soja umak u receptima koriste grame pa se mililitri s boce ne pretvaraju automatski u grame. Pakiranja su promjenjivi primjeri, ne tvrdnje o dostupnosti kod trgovaca.
 
 Fotografije su AI ilustracije načina posluživanja, a ne dokumentacija skuhanih jela. Novi recepti imaju poveznice na izvorne objavljene recepte i opisuju obiteljske prilagodbe; prilagodbe nisu zasebno kuhinjski testirane. Nutritivne vrijednosti su procjene prema sirovim/suhim namirnicama. Nedostajući podaci u USDA bazi ostaju označeni kao `null`; zbrojevi mogu biti nepotpuni.
 

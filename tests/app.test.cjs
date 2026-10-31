@@ -274,3 +274,37 @@ test('dialog backdrop does not swallow native controls inside the dialog', () =>
   run("testEvents.click.forEach(fn=>fn({target:backdrop,preventDefault(){prevented=true}}))");
   assert.equal(run('closed'),true);
 });
+test('spice needs follow the selected recipes, distinguish paprika types and merge four actual weeks', () => {
+  const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'v','V13')");
+  let needs=run("spiceNeeds('2026-11-02')");
+  for(const id of ['kurkuma','kumin','dimljena','papar','sol'])assert.equal(needs[id].count,1);
+  assert.equal(needs.slatka,undefined);assert.equal(needs.menta,undefined);
+  run("setSlot('2026-11-02',0,'v','V15')");needs=run("spiceNeeds('2026-11-02')");
+  assert.ok(needs.djumbir);assert.equal(needs.kurkuma,undefined);
+  run("CURATED_MENU.weeks.forEach(w=>state.docs['plans/'+w.week]=w)");
+  const total=run("spiceNeeds('2026-11-02','month').kumin.count");
+  assert.equal(total,run("shoppingWeeks('2026-11-02').reduce((n,w)=>n+(spiceNeeds(w).kumin?.count||0),0)"));
+  for(const id of ['ruzmarin','timijan','lovor','mazuran','muskat','menta','kopar','vlasac','bosiljak'])assert.ok(run(`spiceNeeds('2026-11-02','month')['${id}']`),id);
+});
+test('spice pantry persists across periods while fresh herbs stay weekly and all survive export/import', () => {
+  const run=app();run("state.docs['settings/main']={names:{T:'Test'},favorites:['R14']};state.docs['shopping/2026-11-02']={checked:{jaja:true},stock:{jaja:100}};setSpiceOwned('origano','2026-11-02',true);setSpiceOwned('persin','2026-11-02',true)");
+  assert.ok(run("spiceOwned(SPICES.find(s=>s.id==='origano'),'2026-12-07')"));
+  assert.ok(!run("spiceOwned(SPICES.find(s=>s.id==='persin'),'2026-11-09')"));
+  assert.equal(run("state.docs['shopping/2026-11-02'].stock.jaja"),100);
+  assert.ok(run("state.docs['shopping/2026-11-02'].checked.jaja"));
+  const exported=run('JSON.stringify(exportData())');run('closeModal=()=>{};state.docs={}');run(`importData(${JSON.stringify(exported)})`);
+  assert.ok(run("spiceOwned(SPICES.find(s=>s.id==='persin'),'2026-11-02')"));
+  assert.ok(run("spiceOwned(SPICES.find(s=>s.id==='origano'),'2026-11-02')"));
+  assert.equal(run('settings().names.T'),'Test');assert.ok(run("favorites().has('R14')"));
+  run("setSpiceOwned('origano','2026-11-02',false)");assert.ok(!run("settings().spicePantry.origano"));
+});
+test('shopping exports include spices once for the pantry and herbs per actual week, with optional items labelled', () => {
+  const run=app();run("CURATED_MENU.weeks.forEach(w=>state.docs['plans/'+w.week]=w);setSpiceOwned('origano','2026-11-02',true)");
+  const text=run("shoppingText('2026-11-02','month')");
+  assert.equal((text.match(/\[x\] Imam Origano, sušeni/g)||[]).length,1);
+  assert.equal((text.match(/SVJEŽE \/ SMRZNUTO BILJE/g)||[]).length,4);
+  assert.ok(text.includes('PO ŽELJI · NIJE OBAVEZNA KUPOVINA'));
+  assert.ok(!text.includes('Međuobroci i začini po ukusu nisu uključeni'));
+  assert.ok(run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Kurkuma'));
+  assert.ok(!run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Čili pahuljice'));
+});

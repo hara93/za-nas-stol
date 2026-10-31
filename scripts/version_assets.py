@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 root = Path(__file__).resolve().parent.parent
-assets = ['experience.css', 'shopping-data.js', 'shopping.js']
+assets = ['experience.css', 'shopping-data.js', 'shopping.js', 'spices.js']
 html_path = root / 'index.html'
 html = html_path.read_text()
 urls = []
