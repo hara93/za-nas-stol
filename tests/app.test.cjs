@@ -54,7 +54,7 @@ test('new recipes expose source, tags and dry-weight nutrition', () => {
     assert.match(r.source.url,/^https:\/\//);
     assert.ok(r.source.note && r.nutritionNote);
     const detail=run(`viewRecipeDetail(RB['${id}'])`);
-    assert.ok(detail.includes(r.source.url) && detail.includes('recipe-source'));
+    assert.ok(detail.includes(r.source.url) && detail.includes('Izvor recepta'));
     for(const ingredient of ['kvinoja','heljda','tofu']) if(r.batch.some(e=>e[1]===ingredient))assert.ok(r.tags.includes(ingredient));
   }
 });
@@ -311,19 +311,31 @@ test('shopping exports include spices once for the pantry and herbs per actual w
   assert.ok(run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Kurkuma'));
   assert.ok(!run("spiceModal({start:'2026-11-02',mode:'month',tab:'needed'},'')").includes('Čili pahuljice'));
 });
-test('the full recipe review covers every dish and snack and exposes practical advice',()=>{
-  const run=app(),review=JSON.parse(fs.readFileSync(path.join(base,'data/recipe-review.json'),'utf8'));
-  const all=run('[...RECIPES,...SNACKS]'),report=fs.readFileSync(path.join(base,'pregled-recepata.html'),'utf8');
-  assert.equal(review.recipes.length,all.length);
+test('recipes show finished preparation without editorial history or a separate report',()=>{
+  const run=app(),all=run('[...RECIPES,...SNACKS]');
   for(const r of all){
-    assert.ok(r.review.flavor&&r.review.balance,r.id);
-    assert.equal(review.recipes.filter(x=>x.id===r.id).length,1,r.id);
-    assert.ok(report.includes(`id="${r.id}"`),r.id);
+    assert.equal(r.review,undefined,r.id);
     if(r.steps){
-      assert.ok(run(`viewRecipeDetail(RB['${r.id}'])`).includes(r.review.flavor));
+      assert.ok(r.steps.length>0);
+      const detail=run(`viewRecipeDetail(RB['${r.id}'])`);
+      assert.ok(!detail.includes('pregled-recepata.html')&&!detail.includes('Za ravnotežu obroka'),r.id);
       assert.ok(!r.steps.some(s=>/\d+\s*\/\s*\d+\s*\/\s*\d+/.test(s)),`${r.id}: no fixed serving ratios`);
-    }
+    } else assert.ok(r.prep&&r.prep.length>30,r.id);
   }
+  assert.ok(!run('viewRecipes()').includes('pregled-recepata.html'));
+  run("state.rmeal='snacks'");const snacks=run('viewRecipes()');
+  assert.ok(snacks.includes(run('SB.S02.prep')));
+  assert.ok(!snacks.includes('Okus i ravnoteža'));
+});
+test('old report links open the finished cookbook and retain valid recipe anchors',()=>{
+  const page=fs.readFileSync(path.join(base,'pregled-recepata.html'),'utf8');
+  const script=page.match(/<script>([\s\S]*?)<\/script>/)[1];
+  for(const [hash,expected] of [['#V12','./#recepti/V12'],['#R15','./#recepti/R15'],['','./#recepti'],['#S02','./#recepti']]){
+    let target;
+    vm.runInNewContext(script,{location:{hash,replace:url=>target=url}});
+    assert.equal(target,expected);
+  }
+  assert.ok(!page.includes('Najvažniji zaključci')&&!page.includes('Nalaz.'));
 });
 test('changed quantities feed both shopping and portions, with child exclusions applied before totals',()=>{
   const run=app();run("state.docs['plans/2026-11-02']=emptyPlan('2026-11-02');setSlot('2026-11-02',0,'l','R10');setSlot('2026-11-02',1,'l','R11')");

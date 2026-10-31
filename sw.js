@@ -1,7 +1,7 @@
 // Network-first app shell; visited meal photos remain available offline.
-const VERSION = 'zns-8dbada567247';
+const VERSION = 'zns-174721d4c3cc';
 const FONTS = 'zns-fonts';
-const CORE = ["./", "./index.html", "./pregled-recepata.html", "./experience.css?v=7c5acd419659", "./shopping-data.js?v=68ac99a6ce87", "./shopping.js?v=f32bb0beb1e7", "./spices.js?v=5738cfa827db", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
+const CORE = ["./", "./index.html", "./pregled-recepata.html", "./experience.css?v=bab9254669f9", "./shopping-data.js?v=68ac99a6ce87", "./shopping.js?v=f32bb0beb1e7", "./spices.js?v=5738cfa827db", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
 });
@@ -13,8 +13,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (req.mode === 'navigate') {
-    const review = url.pathname === new URL('./pregled-recepata.html', self.location.href).pathname;
-    const page = review ? './pregled-recepata.html' : './index.html';
+    const legacyPage = url.pathname === new URL('./pregled-recepata.html', self.location.href).pathname;
+    const page = legacyPage ? './pregled-recepata.html' : './index.html';
     e.respondWith(fetch(req).then(async res => {
       if (res.ok) { const cache = await caches.open(VERSION); await cache.put(page, res.clone()); }
       else { const hit = await caches.match(page); if (hit) return hit; }

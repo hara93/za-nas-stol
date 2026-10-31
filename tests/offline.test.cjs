@@ -57,11 +57,11 @@ test('a cache-first worker does not reuse unversioned CSS for a new version URL'
   assert.equal(await (await sw.request(url)).text(),'old styles');
   assert.equal(await (await sw.request(url+'?v=new')).text(),'new styles');
 });
-test('reading the recipe report never overwrites the offline app shell',async()=>{
+test('old recipe links never overwrite the offline app shell',async()=>{
   let offline=false;
-  const sw=worker(async req=>{if(offline)throw new Error('offline');return new Response(req.url.includes('pregled-recepata.html')?'report':'app');});
+  const sw=worker(async req=>{if(offline)throw new Error('offline');return new Response(req.url.includes('pregled-recepata.html')?'redirect':'app');});
   const base='https://example.com/za-nas-stol/';
   await sw.request(base,'navigate');await sw.request(base+'pregled-recepata.html','navigate');offline=true;
   assert.equal(await (await sw.request(base,'navigate')).clone().text(),'app');
-  assert.equal(await (await sw.request(base+'pregled-recepata.html','navigate')).clone().text(),'report');
+  assert.equal(await (await sw.request(base+'pregled-recepata.html','navigate')).clone().text(),'redirect');
 });
